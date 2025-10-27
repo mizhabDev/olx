@@ -1,4 +1,5 @@
-import express, { Router }  from "express";
+import express  from "express";
+import cookieParser from "cookie-parser";
 import userRoutes from "./routes/userRoutes";
 import productRoutes from "./routes/productRoutes";
 import { errorHandler } from "./middlewares/errorHandler";
@@ -9,6 +10,7 @@ const app = express();
 
 // Middlewares
 app.use(express.json());
+app.use(cookieParser()); //reading cookie
 
 // User Routes
 app.use("/api/user", userRoutes);
