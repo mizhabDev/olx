@@ -3,4 +3,7 @@ export interface typeUser extends Document {
   email: string;
   password: string;
   createdAt: Date;
+  otp:string;
+  otpExpiry:Date;
+  isVerified:Boolean
 }

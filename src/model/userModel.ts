@@ -15,9 +15,26 @@ export const userSchema = new Schema<typeUser>({
 
     password: {
         type: String,
-        required:true
+        required: true
     },
-    createdAt: { type: Date, default: Date.now }
+    createdAt: {
+        type: Date,
+        default: Date.now
+    },
+    otp: {
+        type: String,
+        required: true
+    },
+    otpExpiry: {
+        type: Date,
+        required: true,
+        index: { expires: 300 } // 300 seconds = 5 minutes
+    },
+    isVerified:{
+        type:Boolean,
+        require:true,
+        default:false,
+    }
 })
 
 export const User = model<typeUser>("User", userSchema);

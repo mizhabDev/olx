@@ -1,6 +1,7 @@
 import {
     userExist,
-    createUser
+    createUser,
+    verifyOtp
 }  from "../controllers/userController";
 import { Router } from "express";
 const router = Router();
@@ -13,6 +14,7 @@ router.get('/login', userExist);
 
 // post router
 router.post('/register', createUser);
+router.post('/verifyOtp',verifyOtp)
 
 
 export default router;
