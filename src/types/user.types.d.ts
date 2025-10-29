@@ -1,9 +1,14 @@
+
+
 export interface typeUser extends Document {
   name: string;
   email: string;
-  password: string;
-  createdAt: Date;
-  otp:string;
-  otpExpiry:Date;
-  isVerified:Boolean
+  password?: string;
+  googleId?: string;
+  photo?: string;
+  createdAt?: Date;
+  otp?: string;
+  otpExpiry?: Date;
+  isVerified: boolean;
 }
+

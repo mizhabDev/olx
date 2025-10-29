@@ -27,8 +27,12 @@ export const userExist = async (req: Request<{}, {}, typeUser>, res: Response): 
         message: "Your email is not verified. Please verify your account before logging in.",
       });
     }
-
-
+    if (!password) {
+      return res.status(400).json({ message: "Password is required" });
+    }
+    if (!user.password) {
+      return res.status(400).json({ message: "User has no Password google sign required" });
+    }
     const isMatch = bcrypt.compare(password, user.password);
     if (!isMatch) {
       return res.status(400).json({ message: "Password incorrect" });
@@ -164,6 +168,12 @@ export const verifyOtp = async (req: Request, res: Response) => {
     }
 
     //  Check OTP validity
+    if (!user.otp) {
+      return res.status(400).json({
+        success: false,
+        message: "No OTP found. Please request a new one.",
+      });
+    }
     const isMatch = bcrypt.compare(otp, user.otp);
     if (!isMatch) {
       return res.status(400).json({
@@ -172,19 +182,19 @@ export const verifyOtp = async (req: Request, res: Response) => {
       });
     }
 
-    
+
     //  If all good → verify user
     await User.updateOne(
-  { email: email },
-  {
-    $unset: { otp: "", otpExpiry: "" }, // removes both fields
-    $set: { isVerified: true }
-  }
-);
+      { email: email },
+      {
+        $unset: { otp: "", otpExpiry: "" }, // removes both fields
+        $set: { isVerified: true }
+      }
+    );
 
     await user.save();
 
-     // Create JWT token
+    // Create JWT token
     const token = jwt.sign(
       { id: user._id, email: user.email }, // payload
       process.env.JWT_SECRET as string,
@@ -216,5 +226,41 @@ export const verifyOtp = async (req: Request, res: Response) => {
       success: false,
       message: "Server error. Please try again later.",
     });
+  }
+};
+
+
+
+
+export const googleCallback = (req: Request, res: Response) => {
+  try {
+    const userData = req.user as any;
+
+    console.log("User received in googleCallback", userData);
+
+    if (!userData || !userData.user || !userData.token) {
+      return res.redirect("/login");
+    }
+
+    const { token } = userData;
+
+    // Store JWT token in cookie
+    res.cookie("token", token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      maxAge: 60 * 60 * 1000, // 1 hour
+    });
+
+    console.log(`token recived: ${token}
+    ---------------`);
+
+    return res.redirect("/success");
+
+
+
+  } catch (error) {
+    console.error("Google login error:", error);
+    return res.redirect("/login");
   }
 };
