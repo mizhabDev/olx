@@ -10,5 +10,6 @@ export interface typeUser extends Document {
   otp?: string;
   otpExpiry?: Date;
   isVerified: boolean;
+  wishlist?: Types.ObjectId[];
 }
 

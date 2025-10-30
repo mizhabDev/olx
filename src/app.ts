@@ -6,6 +6,7 @@ import { errorHandler } from "./middlewares/errorHandler";
 import pageRoutes from "./routes/pageRoutes"
 import session  from "express-session";
 import passport from "./config/passport";
+import wishlistRoutes from "./routes/wishListRoutes";
 import dotenv from "dotenv";
 dotenv.config()
 
@@ -36,6 +37,8 @@ app.use("/api/product", productRoutes);
 
 // page Router
 app.use("/page", pageRoutes);
+app.use("/wishlist",wishlistRoutes)
+
 
 app.get("/success", (req, res) => {
   res.send("Login success ✅");

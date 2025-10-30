@@ -8,6 +8,7 @@ import { generateOtp } from "../utils/otpGeneration";
 
 
 
+
 export const userExist = async (req: Request<{}, {}, typeUser>, res: Response): Promise<any> => {
 
   try {
@@ -80,15 +81,19 @@ export const createUser = async (req: Request, res: Response) => {
     }
 
     const existingUser = await User.findOne({ email });
-    console.log(existingUser?.isVerified);
-
+    
     if (existingUser) {
+      console.log("User already exist, verify:",existingUser?.isVerified);
       if (!existingUser.isVerified) {
         // 🔹 Resend OTP to unverified user
         const otp = generateOtp();
-        existingUser.otp = otp;
+        const hashOtp = await bcrypt.hash(otp,10);
+        existingUser.otp = hashOtp;
         existingUser.otpExpiry = new Date(Date.now() + 5 * 60 * 1000);
         await existingUser.save();
+
+        console.log("Your new otp:",otp);
+         
 
         await sendEmail(email, "Verify your email - OTP", `Your OTP code is ${otp}`);
 
@@ -149,9 +154,17 @@ export const createUser = async (req: Request, res: Response) => {
 export const verifyOtp = async (req: Request, res: Response) => {
   try {
     const { email, otp } = req.body;
+    console.log(req.body);
+    
 
     // 1 Check if user exists
     const user = await User.findOne({ email });
+    console.log(`Trying to verify the otp form this email: ${email} otp reached: ${otp}` );
+
+    if(!email&&!otp){
+      return res.status(404).json({message:"Email and otp required"});
+    }
+    
     if (!user) {
       return res.status(404).json({
         success: false,
@@ -174,13 +187,16 @@ export const verifyOtp = async (req: Request, res: Response) => {
         message: "No OTP found. Please request a new one.",
       });
     }
-    const isMatch = bcrypt.compare(otp, user.otp);
+    const isMatch = await bcrypt.compare(otp, user.otp);
+    console.log("isMatch in otp verify",isMatch);
     if (!isMatch) {
-      return res.status(400).json({
+      return res.status(400).json({ 
         success: false,
         message: "Invalid OTP. Please try again.",
       });
     }
+    
+    
 
 
     //  If all good → verify user
@@ -201,7 +217,9 @@ export const verifyOtp = async (req: Request, res: Response) => {
       { expiresIn: "1h" }
     );
 
-    console.log(token);
+    console.log(`token recived:
+      ${token}
+    -----------------`);
 
 
     // Store in secure cookie
@@ -211,9 +229,6 @@ export const verifyOtp = async (req: Request, res: Response) => {
       sameSite: "lax",
       maxAge: 60 * 60 * 1000,
     });
-
-
-
 
     return res.status(200).json({
       success: true,

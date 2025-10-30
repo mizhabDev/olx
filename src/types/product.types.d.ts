@@ -6,7 +6,8 @@ export interface IProduct extends Document {
   productPrice: number;
   productLocation: String;
   productPhotoSrc: string;
-  createdBy:{
-    name:String
+  productCatogery: string;
+  createdBy: {
+    name: String
   }
 }

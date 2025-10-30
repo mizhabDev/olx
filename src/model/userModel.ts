@@ -49,6 +49,12 @@ export const userSchema = new Schema<typeUser>({
     required: true,
     default: false,
   },
+   wishlist: [
+    {
+      type: Schema.Types.ObjectId,
+      ref: "Product",
+    },
+  ],
 });
 
 export const User = model<typeUser>("User", userSchema);

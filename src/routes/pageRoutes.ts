@@ -6,4 +6,5 @@ const router=Router();
 
 router.get('/homePage',verifyToken,getHomePage);
 
+
 export default router;

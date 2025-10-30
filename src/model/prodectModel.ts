@@ -1,4 +1,4 @@
-import { model, Schema } from "mongoose";
+import  { model, Schema } from "mongoose";
 import { IProduct } from "../types/product.types";
 
 
@@ -16,6 +16,10 @@ export const productSchema = new Schema<IProduct>({
         require:true
     },
     productPhotoSrc: String,
+    productCatogery:{
+        type:String,
+        default:"other",
+    },
     createdBy: {
         name: {
             type:String, 
