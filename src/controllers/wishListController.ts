@@ -1,18 +1,21 @@
-import { Request, Response } from "express";
+import { Response } from "express";
+import { AuthRequest } from "../types/auth";
+
 import { User } from "../model/userModel";
-import { MyRequest } from "../types/auth";
+
+
 
 
 
 // ✅ Add to Wishlist
-export const addToWishlist = async (req: MyRequest, res: Response) => {
+export const addToWishlist = async (req: AuthRequest, res: Response) => {
     try {
         if (!req.user) {
             return res.status(401).json({ message: "Unauthorized User should be loggin first" });
         }
         console.log("the user", req.user);
 
-        const userId = req.user.id; // assuming user authenticated
+        const userId = req.user?._id; // assuming user authenticated
         console.log("Adding wishlist to", userId);
 
         const { productId } = req.body;
@@ -27,14 +30,14 @@ export const addToWishlist = async (req: MyRequest, res: Response) => {
         res.status(200).json({ message: "Product added to wishlist" });
     } catch (error) {
         console.error(error);
-        res.status(500).json({ message: "Error adding to wishlist" });
+        res.status(500).json({ message: "Error adding to wishlist" }); 
     }
 };
 
 // 💔 Remove from Wishlist
-export const removeFromWishlist = async (req: MyRequest, res: Response) => {
+export const removeFromWishlist = async (req: AuthRequest, res: Response) => {
     try {
-        const userId = req.user?.id;
+        const userId = req.user?._id;
         const { productId } = req.body;
 
         await User.findByIdAndUpdate(
@@ -51,12 +54,12 @@ export const removeFromWishlist = async (req: MyRequest, res: Response) => {
 };
 
 // 👀 Get Wishlist
-export const getWishlist = async (req: MyRequest, res: Response) => {
+export const getWishlist = async (req: AuthRequest, res: Response) => {
     try {
         if (!req.user) {
             return res.status(401).json({ message: "Unauthorized" });
         }
-        const userId = req.user.id;
+        const userId = req.user?._id;
         const user = await User.findById(userId).populate("wishlist");
 
         // 🟢 Check if user is null

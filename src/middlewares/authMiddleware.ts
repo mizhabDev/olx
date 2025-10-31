@@ -3,7 +3,7 @@ import jwt from "jsonwebtoken";
 
 
 interface JwtPayload {
-  id: string;
+  _id: string;
   email: string;
 }
 
@@ -16,7 +16,7 @@ export const verifyToken = (req: Request, res: Response, next: NextFunction) => 
     }
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET as string) as JwtPayload;
-    req.user = decoded; // now _id and email are known
+    req.user = decoded; 
     next();
   } catch (error) {
     res.status(403).json({ message: "Invalid or expired token" });

@@ -42,7 +42,7 @@ export const userExist = async (req: Request<{}, {}, typeUser>, res: Response): 
 
     // Create JWT token
     const token = jwt.sign(
-      { id: user._id, email: user.email }, // payload
+      { _id: user._id, email: user.email }, // payload
       process.env.JWT_SECRET as string,
       { expiresIn: "1h" }
     );
@@ -212,7 +212,7 @@ export const verifyOtp = async (req: Request, res: Response) => {
 
     // Create JWT token
     const token = jwt.sign(
-      { id: user._id, email: user.email }, // payload
+      { _id: user._id, email: user.email }, // payload
       process.env.JWT_SECRET as string,
       { expiresIn: "1h" }
     );

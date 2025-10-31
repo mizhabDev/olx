@@ -45,11 +45,11 @@ app.get("/success", (req, res) => {
 });
 
 app.get("/login", (req, res) => {
-  res.send("Login failed ❌");
+  res.send("Login failed ❌"); 
 });
-
+ 
 //error handling middleware
 app.use(errorHandler);
-
+ 
  
 export default app;

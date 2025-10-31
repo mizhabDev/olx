@@ -1,6 +1,6 @@
 
 import {
-    getProduct,
+  
     createProduct
 }  from "../controllers/productController";
 
@@ -9,13 +9,12 @@ import { verifyToken } from "../middlewares/authMiddleware";
 const router = Router();
 
 
-// get router
-router.get('/',verifyToken, getProduct);
+
 
 
 
 // post router
-router.post('/', createProduct);
+router.post('/', verifyToken,createProduct);
 
 
 export default router;

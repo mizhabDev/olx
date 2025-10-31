@@ -13,8 +13,8 @@ export const createProduct = async (req: Request<{}, {}, IProduct>, res: Respons
       productPhotoSrc,
       productCatogery,
     } = req.body;
-
-    const userName = req.user.name
+    console.log(req.user);
+    
 
     const newProduct = new Product({
       productName,
@@ -23,7 +23,7 @@ export const createProduct = async (req: Request<{}, {}, IProduct>, res: Respons
       productPhotoSrc,
       productCatogery,
       createdBy: {
-        name: userName
+        _id: "userName"
       }
     });
 

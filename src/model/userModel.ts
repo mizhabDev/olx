@@ -2,6 +2,7 @@ import { model, Schema } from "mongoose";
 import { typeUser } from "../types/user.types";
 
 export const userSchema = new Schema<typeUser>({
+  
   name: {
     type: String,
     required: true,
