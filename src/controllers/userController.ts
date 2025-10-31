@@ -5,6 +5,8 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import { sendEmail } from "../utils/sendEmail";
 import { generateOtp } from "../utils/otpGeneration";
+import { AuthRequest } from "../types/auth";
+
 
 
 
@@ -247,15 +249,18 @@ export const verifyOtp = async (req: Request, res: Response) => {
 
 
 
-export const googleCallback = (req: Request, res: Response) => {
+export const googleCallback = (req: AuthRequest, res: Response) => {
   try {
     const userData = req.user as any;
 
     console.log("User received in googleCallback", userData);
 
-    if (!userData || !userData.user || !userData.token) {
+    if (!userData  || !userData.token) {
       return res.redirect("/login");
     }
+
+    console.log("user true");
+    
 
     const { token } = userData;
 
