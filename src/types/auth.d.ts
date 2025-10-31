@@ -29,7 +29,7 @@ import { Types } from "mongoose";
 
 export interface AuthRequest extends Request {
   user?: {
-    _id: string | Types.ObjectId;
+    _id?: string | Types.ObjectId;
     name?: string;
     email?: string;
   };

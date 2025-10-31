@@ -8,6 +8,9 @@ export interface IProduct extends Document {
   productPhotoSrc: string;
   productCatogery: string;
   createdBy: {
-    name: String
+    _id:string;
+    name: String;
+    email:String
+    date:Date;
   }
 }
