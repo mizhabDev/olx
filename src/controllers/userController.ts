@@ -107,7 +107,7 @@ export const createUser = async (req: Request, res: Response) => {
 
 
     //password hashing 
-    const hashPass = await bcrypt.hash("password", 10);
+    const hashPass = await bcrypt.hash(password, 10);
     if (!hashPass) {
       console.log("password hashing error");
       return res.status(400).json({ message: "Internal server error" })
@@ -115,7 +115,7 @@ export const createUser = async (req: Request, res: Response) => {
 
     // generating otp
     const otp = generateOtp();
-    const hashOtp = await bcrypt.hash("otp", 10);
+    const hashOtp = await bcrypt.hash(otp, 10);
     if (!hashOtp) {
       console.log("password hashing error");
       return res.status(400).json({ message: "Internal server error" })
