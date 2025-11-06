@@ -10,7 +10,7 @@ const router = Router();
 
 
 // get router
-router.get('/login', userExist);
+router.post('/login', userExist);
 
 //  Route to start Google login
 router.get("/google",passport.authenticate("google", { scope: ["profile", "email"] }));

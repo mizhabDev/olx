@@ -57,6 +57,7 @@ export const userExist = async (req: Request<{}, {}, typeUser>, res: Response): 
       secure: process.env.NODE_ENV === "production",
       sameSite: "lax",
       maxAge: 60 * 60 * 1000,
+      path:"/"
     });
 
 
@@ -230,6 +231,7 @@ export const verifyOtp = async (req: Request, res: Response) => {
       secure: process.env.NODE_ENV === "production",
       sameSite: "lax",
       maxAge: 60 * 60 * 1000,
+      path:"/"
     });
 
     return res.status(200).json({
@@ -270,9 +272,11 @@ export const googleCallback = (req: AuthRequest, res: Response) => {
       secure: process.env.NODE_ENV === "production",
       sameSite: "lax",
       maxAge: 60 * 60 * 1000, // 1 hour
+      path:"/"
     });
 
-    console.log(`token recived: ${token}
+    console.log(`
+      token recived from google callback: ${token}
     ---------------`);
 
     return res.redirect("/success");
