@@ -154,6 +154,14 @@
     }
   });
 
+  const token = document.cookie
+  .split('; ')
+  .find(row => row.startsWith('token='))
+  ?.split('=')[1];
+
+
+
+
   // ✅ Join user’s private room when connected
   socket.on("connect", () => {
     console.log("🟢 Connected as:", "<%= user.email %>");
@@ -163,6 +171,9 @@
   sendBtn.addEventListener("click", () => {
     const message = messageInput.value.trim();
     if (!message) return;
+
+    console.log(document.cookie);
+    
 
     socket.emit("message", {
       text: message,
