@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -54,7 +53,7 @@
       width: 90%;
       max-width: 500px;
       border-radius: 10px;
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
       overflow: hidden;
     }
 
@@ -116,6 +115,7 @@
     .message-input button:hover {
       background-color: #1e7e34;
     }
+
   </style>
   <script src="/socket.io/socket.io.js"></script>
 
@@ -140,56 +140,55 @@
     </div>
   </div>
 
+  <script src="/socket.io/socket.io.js"></script>
+<script>
+  const sendBtn = document.getElementById("sendBtn");
+  const messageInput = document.getElementById("messageInput");
+  const messagesDiv = document.getElementById("messages");
 
-  <script>
-    const sendBtn = document.getElementById("sendBtn");
-    const messageInput = document.getElementById("messageInput");
-    const messagesDiv = document.getElementById("messages");
+  // ✅ Connect user to socket server with identity
+  const socket = io({
+    auth: {
+      senderEmail: "<%= user.email %>",  
+      targetEmail: "<%= admin.email %>", 
+    }
+  });
 
-    // ✅ Connect user to socket server with identity
-    const socket = io({
-      auth: {
-        senderEmail: "<%= user.email %>",
-        targetEmail: "<%= admin.email %>",
-      }
+  // ✅ Join user’s private room when connected
+  socket.on("connect", () => {
+    console.log("🟢 Connected as:", "<%= user.email %>");
+  });
+
+  // ✅ Send message to backend (to admin)
+  sendBtn.addEventListener("click", () => {
+    const message = messageInput.value.trim();
+    if (!message) return;
+
+    socket.emit("message", {
+      text: message,
+      senderEmail: "<%= user.email %>",
+      receiverEmail: "<%= admin.email %>",
     });
 
-    // ✅ Join user’s private room when connected
-    socket.on("connect", () => {
-      console.log("🟢 Connected as:", "<%= user.email %>");
-    });
+    messageInput.value = "";
+  });
 
-    // ✅ Send message to backend (to admin)
-    sendBtn.addEventListener("click", () => {
-      const message = messageInput.value.trim();
-      if (!message) return;
+  // ✅ Receive message (from admin)
+  socket.on("message", (data) => {
+    const msgDiv = document.createElement("div");
+    msgDiv.classList.add("message");
 
-      socket.emit("message", {
-        text: message,
-        senderEmail: "<%= user.email %>",
-        receiverEmail: "<%= admin.email %>",
-      });
+    if (data.senderEmail === "<%= user.email %>") {
+      msgDiv.classList.add("sent");
+    } else {
+      msgDiv.classList.add("received");
+    }
 
-      messageInput.value = "";
-    });
-
-    // ✅ Receive message (from admin)
-    socket.on("message", (data) => {
-      const msgDiv = document.createElement("div");
-      msgDiv.classList.add("message");
-
-      if (data.senderEmail === "<%= user.email %>") {
-        msgDiv.classList.add("sent");
-      } else {
-        msgDiv.classList.add("received");
-      }
-
-      msgDiv.textContent = data.text;
-      messagesDiv.appendChild(msgDiv);
-      messagesDiv.scrollTop = messagesDiv.scrollHeight;
-    });
-  </script>
+    msgDiv.textContent = data.text;
+    messagesDiv.appendChild(msgDiv);
+    messagesDiv.scrollTop = messagesDiv.scrollHeight;
+  });
+</script>
 
 </body>
-
 </html>
