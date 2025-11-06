@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chat with Admin (<%= admin.email %>)</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f5f7fa;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+    }
+
+    .header {
+      background-color: #28a745;
+      color: white;
+      padding: 15px;
+      text-align: center;
+      font-size: 1.2rem;
+      font-weight: bold;
+      position: relative;
+    }
+
+    .back-btn {
+      position: absolute;
+      top: 15px;
+      left: 15px;
+      color: white;
+      background: rgba(255, 255, 255, 0.2);
+      border: none;
+      padding: 5px 10px;
+      border-radius: 10px;
+      cursor: pointer;
+      font-weight: bold;
+      transition: background 0.2s;
+    }
+
+    .back-btn:hover {
+      background: rgba(255, 255, 255, 0.4);
+    }
+
+    .chat-container {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      background: #fff;
+      margin: 20px auto;
+      width: 90%;
+      max-width: 500px;
+      border-radius: 10px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+      overflow: hidden;
+    }
+
+    .messages {
+      flex: 1;
+      padding: 15px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .message {
+      padding: 10px 15px;
+      border-radius: 20px;
+      max-width: 75%;
+    }
+
+    .sent {
+      background-color: #28a745;
+      color: white;
+      align-self: flex-end;
+    }
+
+    .received {
+      background-color: #e5e5e5;
+      color: #333;
+      align-self: flex-start;
+    }
+
+    .message-input {
+      display: flex;
+      padding: 10px;
+      border-top: 1px solid #ccc;
+      background-color: #f9f9f9;
+    }
+
+    .message-input input {
+      flex: 1;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 20px;
+      outline: none;
+      font-size: 1rem;
+    }
+
+    .message-input button {
+      background-color: #28a745;
+      color: white;
+      border: none;
+      padding: 10px 18px;
+      margin-left: 10px;
+      border-radius: 20px;
+      cursor: pointer;
+      font-weight: bold;
+      transition: background 0.2s;
+    }
+
+    .message-input button:hover {
+      background-color: #1e7e34;
+    }
+  </style>
+  <script src="/socket.io/socket.io.js"></script>
+
+</head>
+
+<body>
+  <div class="header">
+    <button class="back-btn" onclick="window.location.href='/'">← Back</button>
+    Chat with Admin (<%= admin.email %>)
+  </div>
+
+  <div class="chat-container">
+    <div id="messages" class="messages">
+      <!-- Example static messages -->
+      <div class="message received">Hello! How can I help you today?</div>
+      <div class="message sent">Hi, I have a question about my account.</div>
+    </div>
+
+    <div class="message-input">
+      <input type="text" id="messageInput" placeholder="Type your message..." />
+      <button id="sendBtn">Send</button>
+    </div>
+  </div>
+
+
+  <script>
+    const sendBtn = document.getElementById("sendBtn");
+    const messageInput = document.getElementById("messageInput");
+    const messagesDiv = document.getElementById("messages");
+
+    // ✅ Connect user to socket server with identity
+    const socket = io({
+      auth: {
+        senderEmail: "<%= user.email %>",
+        targetEmail: "<%= admin.email %>",
+      }
+    });
+
+    // ✅ Join user’s private room when connected
+    socket.on("connect", () => {
+      console.log("🟢 Connected as:", "<%= user.email %>");
+    });
+
+    // ✅ Send message to backend (to admin)
+    sendBtn.addEventListener("click", () => {
+      const message = messageInput.value.trim();
+      if (!message) return;
+
+      socket.emit("message", {
+        text: message,
+        senderEmail: "<%= user.email %>",
+        receiverEmail: "<%= admin.email %>",
+      });
+
+      messageInput.value = "";
+    });
+
+    // ✅ Receive message (from admin)
+    socket.on("message", (data) => {
+      const msgDiv = document.createElement("div");
+      msgDiv.classList.add("message");
+
+      if (data.senderEmail === "<%= user.email %>") {
+        msgDiv.classList.add("sent");
+      } else {
+        msgDiv.classList.add("received");
+      }
+
+      msgDiv.textContent = data.text;
+      messagesDiv.appendChild(msgDiv);
+      messagesDiv.scrollTop = messagesDiv.scrollHeight;
+    });
+  </script>
+
+</body>
+
+</html>

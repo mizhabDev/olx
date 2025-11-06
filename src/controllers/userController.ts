@@ -67,6 +67,11 @@ export const userExist = async (req: Request<{}, {}, typeUser>, res: Response): 
   }
 };
 
+
+
+
+
+
 export const createUser = async (req: Request, res: Response) => {
   try {
     const otpExpiry = Date.now() + 5 * 60 * 1000;

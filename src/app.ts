@@ -7,6 +7,7 @@ import pageRoutes from "./routes/pageRoutes"
 import session  from "express-session";
 import passport from "./config/passport";
 import wishlistRoutes from "./routes/wishListRoutes";
+import messageRoutes from './routes/messageRoutes';
 import dotenv from "dotenv";
 dotenv.config()
 
@@ -15,6 +16,7 @@ const app = express();
 
 // Middlewares
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser()); //reading cookie
 app.use(
     session({
@@ -47,9 +49,14 @@ app.get("/success", (req, res) => {
 app.get("/login", (req, res) => {
   res.send("Login failed ❌"); 
 });
+
+
+// messageRoutes
+app.use("/message",messageRoutes);
+
  
 //error handling middleware
-app.use(errorHandler);
+app.use(errorHandler); 
  
  
 export default app;
