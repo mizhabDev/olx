@@ -1,34 +1,31 @@
 import { Server } from "socket.io";
-import jwt from "jsonwebtoken";
 import cookie from "cookie";
+import { decodeToken } from "../utils/jwt";
 
 export function initSocket(io: Server) {
 // Middleware to verify token from cookie
 
   io.use((socket, next) => {
     try {
-      // 🧠 Access raw cookie header from handshake
+      //  Access raw cookie header from handshake
       const cookieHeader = socket.handshake.headers.cookie;
       if (!cookieHeader) {
         return next(new Error("No cookies found"));
       }
 
-      // 🍪 Parse cookies
+      //  Parse cookies
       const parsedCookies = cookie.parse(cookieHeader);
       const token = parsedCookies.token;
 
-      if (!token) {
-        return next(new Error("Authentication token missing"));
-      }
-
-      // 🔐 Verify token
-      const decoded = jwt.verify(token, process.env.JWT_SECRET!);
-      socket.data.user = decoded; // Store decoded info for later
+      //decodeToken function
+      const decoded = decodeToken(token);
+      socket.data.user = decoded;
       next();
+
     } catch (error) {
       console.log("❌ Auth failed:", error);
       next(new Error("Authentication failed"));
-      
+
     }
   });
 

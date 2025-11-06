@@ -1,23 +1,19 @@
-import { NextFunction, Request, Response } from "express";
-import jwt from "jsonwebtoken";
+import { NextFunction, Response } from "express";
+import { decodeToken } from "../utils/jwt";
+import { AuthRequest } from "../types/auth";
 
 
-interface JwtPayload {
-  _id: string;
-  email: string;
-}
 
-export const verifyToken = (req: Request, res: Response, next: NextFunction) => {
+
+export const verifyToken = (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
-    const token =
-  req.cookies?.token || req.headers.authorization?.split(" ")[1];
+    const token =req.cookies?.token || req.headers.authorization?.split(" ")[1];
 
     if (!token) {
       return res.status(401).json({ message: "Access denied, no token provided" });
     }
 
-    const decoded = jwt.verify(token, process.env.JWT_SECRET as string) as JwtPayload;
-    req.user = decoded; 
+    req.user = decodeToken(token); 
     next();
   } catch (error) {
     res.status(403).json({ message: "Invalid or expired token" });
