@@ -1,9 +1,11 @@
 import { Server } from "socket.io";
 import cookie from "cookie";
 import { decodeToken } from "../utils/jwt";
+import { Message } from "../model/messageModel";
+import { log } from "console";
 
 export function initSocket(io: Server) {
-// Middleware to verify token from cookie
+  // Middleware to verify token from cookie
 
   io.use((socket, next) => {
     try {
@@ -20,6 +22,20 @@ export function initSocket(io: Server) {
       //decodeToken function
       const decoded = decodeToken(token);
       socket.data.user = decoded;
+
+      // 🕒 Auto-disconnect when token expires
+      if (decoded.exp) {
+        const expiresInMs = decoded.exp * 1000 - Date.now();
+        if (expiresInMs <= 0) throw new Error("Token already expired");
+
+        setTimeout(() => {
+          console.log(`🔴 Token expired for ${decoded.email}`);
+          socket.disconnect(true);
+        }, expiresInMs);
+
+        console.log(`⏳ Token valid for ${Math.round(expiresInMs / 1000)} seconds`);
+      }
+
       next();
 
     } catch (error) {
@@ -44,14 +60,6 @@ export function initSocket(io: Server) {
     // ✅ Join that room
     socket.join(roomId);
     console.log(`🟢 ${senderEmail} joined ${roomId}`);
-
-    // ✅ Handle incoming messages
-    socket.on("message", (data) => {
-      console.log(`💬 ${data.senderEmail} → ${data.receiverEmail}: ${data.text}`);
-
-      // Emit only to this specific room
-      io.to(roomId).emit("message", data);
-    });
 
     socket.on("disconnect", () => {
       console.log(`🔴 ${senderEmail} left ${roomId}`);
