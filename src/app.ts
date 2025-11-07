@@ -46,7 +46,7 @@ app.get("/success", (req, res) => {
   res.send("Login success ✅");
 });
 
-app.get("/login", (req, res) => {
+app.get("/login", (req, res) => { 
   res.send("Login failed ❌"); 
 });
 

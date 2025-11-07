@@ -22,7 +22,7 @@ export const  adminChatPage = async (req: AuthRequest, res: Response) => {
     log(user)
     // Render chatRoom
     res.render("admin-chat", { user ,admin:{
-      email:"adminOlx@gmail.com"
+      email:"adminolx@gmail.com"
     }});
   } catch (error) {
     console.error("Error loading chat page:", error);
@@ -51,7 +51,7 @@ export const userChat = (req: AuthRequest, res: Response) => {
       },
       admin: {
         name: "AdminOlx",
-        email: "adminOlx@gmail.com",
+        email: "adminolx@gmail.com",
       },
     });
   } catch (error) {

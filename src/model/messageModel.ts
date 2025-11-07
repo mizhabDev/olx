@@ -5,7 +5,7 @@ export interface IMessage extends Document {
   receiverEmail: string;
   message: string;
   createdAt: Date;
-  isRead: boolean;
+  roomId: string;
 }
 
 const messageSchema = new Schema<IMessage>(
@@ -26,7 +26,12 @@ const messageSchema = new Schema<IMessage>(
       type: String,
       required: true,
       trim: true,
-    }
+    },
+    roomId: {
+      type: String,
+      required: true,
+      index: true,
+    },
   },
   {
     timestamps: { createdAt: true, updatedAt: false },

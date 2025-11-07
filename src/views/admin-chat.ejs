@@ -143,15 +143,44 @@
     const sendBtn = document.getElementById("sendBtn");
     const messageInput = document.getElementById("messageInput");
     const messagesDiv = document.getElementById("messages");
-    const senderEmail= "<%= admin.email %>";
-    const targetEmail= "<%= user.email %>"
-    const socket = io({
+    const senderEmail = "<%= admin.email %>";
+    const receiverEmail = "<%= user.email %>"
 
+    const socket = io({
       auth: {
         senderEmail,
-        targetEmail
+        receiverEmail
       }
     });
+
+
+    
+
+    // ✅ 1. Load previous chat history
+    socket.on("chatHistory", (history) => {
+      messagesDiv.innerHTML = "";
+
+      history.forEach((msg) => {
+        const msgDiv = document.createElement("div");
+        msgDiv.classList.add("message");
+
+
+        if (msg.senderEmail === senderEmail) {
+          msgDiv.classList.add("sent");
+        } else {
+          msgDiv.classList.add("received");
+        }
+
+        msgDiv.textContent = msg.message;
+        messagesDiv.appendChild(msgDiv);
+
+
+      });
+      // always scroll to bottom
+      messagesDiv.scrollTop = messagesDiv.scrollHeight;
+
+    });
+
 
     // ✅ when user clicks Send
     sendBtn.addEventListener("click", () => {
@@ -162,8 +191,8 @@
 
       socket.emit("message", {
         text: message,
-        senderEmail: "<%= admin.email %>",
-        receiverEmail: "<%= user.email %>",
+        senderEmail,
+        receiverEmail,
       });
 
       // clear input
@@ -176,7 +205,7 @@
       msgDiv.classList.add("message");
 
       // Check if the message came from me
-      if (data.senderEmail === "<%= admin.email %>") {
+      if (data.senderEmail === senderEmail) {
         msgDiv.classList.add("sent");     // admin’s own message
       } else {
         msgDiv.classList.add("received"); // client’s message
