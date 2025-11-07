@@ -143,17 +143,13 @@
     const sendBtn = document.getElementById("sendBtn");
     const messageInput = document.getElementById("messageInput");
     const messagesDiv = document.getElementById("messages");
-    const token = document.cookie
-  .split('; ')
-  .find(row => row.startsWith('token='))
-  ?.split('=')[1];
-
+    const senderEmail= "<%= admin.email %>";
+    const targetEmail= "<%= user.email %>"
     const socket = io({
-      
+
       auth: {
-        token,
-        senderEmail: "<%= admin.email %>",  
-        targetEmail: "<%= user.email %>"    
+        senderEmail,
+        targetEmail
       }
     });
 
