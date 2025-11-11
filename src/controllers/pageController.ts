@@ -3,8 +3,11 @@ import { Product } from "../model/prodectModel";
 import { AuthRequest } from "../types/auth";
 import { log } from "console";
 import { User } from "../model/userModel";
-import  jwt from "jsonwebtoken";
+import jwt from "jsonwebtoken";
 import { Admin } from "../model/adminModel";
+import { Order } from "../model/orderModel";
+import mongoose from "mongoose";
+
 
 export const getHomePage = async (req: Request, res: Response) => {
   try {
@@ -46,20 +49,21 @@ export const getHomePage = async (req: Request, res: Response) => {
 };
 
 
+
 export const getLoginPage = (req: Request, res: Response) => {
   res.render("login")
 };
 
 
 
-export const getSelectEmail =  async (req: AuthRequest, res: Response) => {
+export const getSelectEmail = async (req: AuthRequest, res: Response) => {
   try {
     // ✅ Fetch all users from olxdb
     const users = await User.find({}, { email: 1, _id: 0 });
 
     // ✅ Render admin page with user list
     res.render("admin-slt-email", {
-      users // pass to EJS
+      users
     });
     log(users)
   } catch (error) {
@@ -69,7 +73,7 @@ export const getSelectEmail =  async (req: AuthRequest, res: Response) => {
 };
 
 
-export const getAdminLoginPage = (req:AuthRequest, res:Response) => {
+export const getAdminLoginPage = (req: AuthRequest, res: Response) => {
   res.render("admin-login", {
     message: "welcome admin"
   })
@@ -117,3 +121,69 @@ export const postAdminDetails = async (req: Request, res: Response) => {
     return res.render("admin-login", { message: "Error occurred!" });
   }
 };
+
+
+
+
+export const buyProduct = async (req: AuthRequest, res: Response) => {
+  try {
+    if (!req.user || !req.user._id) {
+      return res.status(401).json({ message: "Unauthorized: Please login first" });
+    }
+
+    const userId = req.user._id;
+
+    const { productId } = req.body;
+    console.log("this is from request body", req.body);
+
+
+    if (!productId) {
+      return res.status(400).json({ message: "Product ID is required" });
+    }
+
+    const product = await Product.findById(productId);
+
+    if (!product) {
+      return res.status(404).json({ message: "Product not found" });
+    }
+
+    if (product.isSold) {
+      return res.status(400).json({ message: "Product already sold" });
+    }
+
+    if (!userId) {
+      return res.status(401).json({ message: "Unauthorized: Please login first" });
+    }
+    if (!product.createdBy._id) {
+      console.log("created id not find");
+      return res.status(401).json({ message: "created id not found" });
+    }
+
+    if (product.createdBy._id.toString() === userId.toString()) {
+      return res.status(400).json({ message: "You cannot buy your own product" });
+    }
+
+    // Create order 
+    const order = await Order.create({
+      buyer: userId,
+      seller: product.createdBy._id,
+      product: product._id,
+      price: product.productPrice,
+      status: "completed",
+    });
+
+    // Mark product as sold
+    product.isSold = true;
+    await product.save();
+
+    return res.status(200).json({
+      message: "Product purchased successfully",
+      order,
+    });
+  } catch (error) {
+    console.error("Buy Product Error:", error);
+    return res.status(500).json({ message: "from here  Server Error", error });
+  }
+};
+
+

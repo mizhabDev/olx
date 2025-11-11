@@ -20,6 +20,11 @@ export const productSchema = new Schema<IProduct>({
         type:String,
         default:"other",
     },
+    isSold:{
+        type:Boolean,
+        default:false
+ 
+    },
     createdBy: {
         _id:{
             type:String,

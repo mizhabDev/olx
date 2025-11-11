@@ -7,6 +7,7 @@ export interface IProduct extends Document {
   productLocation: String;
   productPhotoSrc: string;
   productCatogery: string;
+  isSold:Boolean
   createdBy: {
     _id:string;
     name: String;
