@@ -6,7 +6,8 @@ import { User } from "../model/userModel";
 import jwt from "jsonwebtoken";
 import { Admin } from "../model/adminModel";
 import { Order } from "../model/orderModel";
-import mongoose from "mongoose";
+import { Page } from "../model/pageModel";
+
 
 
 export const getHomePage = async (req: Request, res: Response) => {
@@ -186,4 +187,20 @@ export const buyProduct = async (req: AuthRequest, res: Response) => {
   }
 };
 
+
+export const getPage = async (req: Request, res: Response) => {
+  try {
+    const { slug } = req.params;
+    const page = await Page.findOne({ slug });
+
+    if (!page) {
+      return res.status(404).json({ success: false, message: "Page not found" });
+    }
+
+    res.status(200).json({ success: true, data: page });
+  } catch (error) {
+    console.error("Error fetching page:", error);
+    res.status(500).json({ success: false, message: "Server error" });
+  }
+};
 

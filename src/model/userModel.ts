@@ -55,7 +55,17 @@ export const userSchema = new Schema<typeUser>({
       type: Schema.Types.ObjectId,
       ref: "Product",
     },
-  ],
+  ], 
+  
+  // 👇 Password Reset Fields
+    resetPasswordToken: {
+      type: String,
+      required: false,
+    },
+    resetPasswordExpire: {
+      type: Date,
+      required: false,
+    },
 });
 
 export const User = model<typeUser>("User", userSchema);

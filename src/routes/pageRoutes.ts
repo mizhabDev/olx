@@ -4,6 +4,7 @@ import {
     getAdminLoginPage,
     getHomePage,
     getLoginPage,
+    getPage,
     getSelectEmail,
     postAdminDetails
 } from "../controllers/pageController";
@@ -15,6 +16,8 @@ router.get('/login', getLoginPage);
 router.get('/selectEmail', verifyToken, getSelectEmail);
 router.get('/admin-login',getAdminLoginPage);
 router.post('/admin-login',postAdminDetails);
+router.get ('/:slug',verifyToken,getPage);
+
 
 
 

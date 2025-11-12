@@ -4,7 +4,7 @@ import dotenv from "dotenv";
 
 dotenv.config();
 
-export const sendEmail = async (to: string, subject: string, text: string) => {
+export const sendEmail = async (to: string, subject: string, html: string) => {
   const transporter = nodemailer.createTransport({
     service: "gmail",
     auth: {
@@ -14,11 +14,14 @@ export const sendEmail = async (to: string, subject: string, text: string) => {
   });
 
   const info = await transporter.sendMail({
-    from: `"olx" <${process.env.EMAIL_USER}>`,
+    from: `"olx" <${process.env.APP_EMAIL}>`,
     to,
     subject,
-    text,
+    html,
   });
 
   console.log("Email sent successfully ✅:", info.messageId);
 };
+
+
+

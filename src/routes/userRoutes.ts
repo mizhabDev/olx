@@ -3,9 +3,13 @@ import {
     userExist,
     createUser,
     verifyOtp,
-    googleCallback
+    googleCallback,
+    getUserDetails,
+    forgotPassword,
+    resetPassword
 }  from "../controllers/userController";
 import { Router } from "express";
+import { verifyToken } from "../middlewares/authMiddleware";
 const router = Router();
 
 
@@ -25,8 +29,14 @@ router.get(
 
 // post router
 router.post('/register', createUser);
-router.post('/verifyOtp',verifyOtp)
+router.post('/verifyOtp',verifyOtp);
+router.get('/userDetails',verifyToken,getUserDetails);
+router.get('/forgetPassword',forgotPassword);
+router.post("/reset-password/:token", resetPassword);
 
+
+ 
 
 export default router;
 
+ 

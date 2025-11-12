@@ -1,7 +1,7 @@
 import { Document, Types } from "mongoose";
 
 export interface typeUser extends Document {
-  _id:string;
+  _id: string;
   name: string;
   email: string;
   password?: string;
@@ -12,4 +12,6 @@ export interface typeUser extends Document {
   otpExpiry?: Date;
   isVerified: boolean;
   wishlist?: Types.ObjectId[];
+  resetPasswordToken?: string;
+  resetPasswordExpire?: Date;
 }
