@@ -8,7 +8,7 @@ const router = express.Router();
 
 
   
-export const  adminChatPage = async (req: AuthRequest, res: Response) => {
+export const adminChatPage = async (req: AuthRequest, res: Response) => {
   try {
     const emailId = req.params.id;
 

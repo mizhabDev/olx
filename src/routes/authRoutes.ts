@@ -4,17 +4,17 @@ import {
     createUser,
     verifyOtp,
     googleCallback,
-    getUserDetails,
     forgotPassword,
     resetPassword
-}  from "../controllers/userController";
+}  from "../controllers/authController";
 import { Router } from "express";
-import { verifyToken } from "../middlewares/authMiddleware";
 const router = Router();
 
 
-// get router
-router.post('/login', userExist);
+
+// user authentication handling router
+router.post('/register', createUser);router.post('/login', userExist);
+router.post('/verifyOtp',verifyOtp);
 
 //  Route to start Google login
 router.get("/google",passport.authenticate("google", { scope: ["profile", "email"] }));
@@ -27,10 +27,6 @@ router.get(
 );
 
 
-// post router
-router.post('/register', createUser);
-router.post('/verifyOtp',verifyOtp);
-router.get('/userDetails',verifyToken,getUserDetails);
 router.get('/forgetPassword',forgotPassword);
 router.post("/reset-password/:token", resetPassword);
 

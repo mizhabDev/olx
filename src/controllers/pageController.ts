@@ -5,15 +5,19 @@ import { log } from "console";
 import { User } from "../model/userModel";
 import jwt from "jsonwebtoken";
 import { Admin } from "../model/adminModel";
-import { Order } from "../model/orderModel";
+
 import { Page } from "../model/pageModel";
 
 
 
 export const getHomePage = async (req: Request, res: Response) => {
   try {
-    const { search, location, minPrice, maxPrice, price } = req.query;
+    const { search, location, minPrice, maxPrice, price ,page = "1" } = req.query;
     const filter: any = {};
+
+    const pageNumber = Number(page);
+    const limit = 6;
+    const skip = (pageNumber - 1) * limit;
 
     //  Text search (name or category)
     if (search && typeof search === "string") {
@@ -40,7 +44,10 @@ export const getHomePage = async (req: Request, res: Response) => {
     }
 
     //  Fetch data
-    const products = await Product.find(filter).limit(6);
+    const products = await Product.find(filter)
+      .skip(skip)
+      .limit(limit);
+
     res.status(200).json(products);
 
   } catch (error) {
@@ -53,7 +60,7 @@ export const getHomePage = async (req: Request, res: Response) => {
 
 export const getLoginPage = (req: Request, res: Response) => {
   res.render("login")
-};
+}; 
 
 
 
@@ -126,66 +133,6 @@ export const postAdminDetails = async (req: Request, res: Response) => {
 
 
 
-export const buyProduct = async (req: AuthRequest, res: Response) => {
-  try {
-    if (!req.user || !req.user._id) {
-      return res.status(401).json({ message: "Unauthorized: Please login first" });
-    }
-
-    const userId = req.user._id;
-
-    const { productId } = req.body;
-    console.log("this is from request body", req.body);
-
-
-    if (!productId) {
-      return res.status(400).json({ message: "Product ID is required" });
-    }
-
-    const product = await Product.findById(productId);
-
-    if (!product) {
-      return res.status(404).json({ message: "Product not found" });
-    }
-
-    if (product.isSold) {
-      return res.status(400).json({ message: "Product already sold" });
-    }
-
-    if (!userId) {
-      return res.status(401).json({ message: "Unauthorized: Please login first" });
-    }
-    if (!product.createdBy._id) {
-      console.log("created id not find");
-      return res.status(401).json({ message: "created id not found" });
-    }
-
-    if (product.createdBy._id.toString() === userId.toString()) {
-      return res.status(400).json({ message: "You cannot buy your own product" });
-    }
-
-    // Create order 
-    const order = await Order.create({
-      buyer: userId,
-      seller: product.createdBy._id,
-      product: product._id,
-      price: product.productPrice,
-      status: "completed",
-    });
-
-    // Mark product as sold
-    product.isSold = true;
-    await product.save();
-
-    return res.status(200).json({
-      message: "Product purchased successfully",
-      order,
-    });
-  } catch (error) {
-    console.error("Buy Product Error:", error);
-    return res.status(500).json({ message: "from here  Server Error", error });
-  }
-};
 
 
 export const getPage = async (req: Request, res: Response) => {

@@ -36,5 +36,5 @@ app.set("views", path.join(__dirname, "../src/views"));
 
 
 server.listen(PORT, () => {
-  console.log(`🚀 Server is running at http://localhost:${PORT}`);
+  console.log(`🚀 Server is running at http://localhost:${PORT}`); 
 });

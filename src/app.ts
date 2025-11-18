@@ -1,9 +1,10 @@
 import express from "express";
 import cookieParser from "cookie-parser";
-import userRoutes from "./routes/userRoutes";
+import authRoutes from "./routes/authRoutes";
 import productRoutes from "./routes/productRoutes";
 import { errorHandler } from "./middlewares/errorHandler";
 import pageRoutes from "./routes/pageRoutes"
+import userRouter from "./routes/userRouter"
 import session  from "express-session";
 import passport from "./config/passport";
 import wishlistRoutes from "./routes/wishListRoutes";
@@ -31,17 +32,30 @@ app.use(passport.initialize());
 // app.use(passport.session());
 
 
-// User Routes
-app.use("/api/user", userRoutes);
+// auth Routes
+app.use("/api/auth", authRoutes);
+
+//user router
+app.use("/api/user",userRouter)
 
 // Prouduct Routes
 app.use("/api/product", productRoutes);
 
+
+//wishlist pages
+app.use("/api/wishlist",wishlistRoutes)
+
 // page Router
-app.use("/page", pageRoutes);
-app.use("/wishlist",wishlistRoutes)
+app.use("/api/page", pageRoutes);
 
 
+// messageRoutes
+app.use("/message",messageRoutes);
+
+ 
+
+
+// test rotues
 app.get("/success", (req, res) => {
   res.send("Login success ✅");
 });
@@ -51,13 +65,9 @@ app.get("/login", (req, res) => {
 });
 
 
-// messageRoutes
-app.use("/message",messageRoutes);
-
- 
 //error handling middleware
 app.use(errorHandler); 
  
  
-export default app;
- 
+export default app; 
+  

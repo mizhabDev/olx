@@ -2,6 +2,7 @@ import { Response } from "express";
 import { AuthRequest } from "../types/auth";
 
 import { User } from "../model/userModel";
+import mongoose from "mongoose";
 
 
 
@@ -18,7 +19,7 @@ export const addToWishlist = async (req: AuthRequest, res: Response) => {
         const userId = req.user?._id; // assuming user authenticated
         console.log("Adding wishlist to", userId);
 
-        const { productId } = req.body;
+        const { productId } = req.params;
         console.log("Adding product id:", productId);
 
         await User.findByIdAndUpdate(
@@ -38,7 +39,21 @@ export const addToWishlist = async (req: AuthRequest, res: Response) => {
 export const removeFromWishlist = async (req: AuthRequest, res: Response) => {
     try {
         const userId = req.user?._id;
-        const { productId } = req.body;
+        const { productId } = req.params;
+
+        const user = await User.findById(userId);
+
+        if (!user) {
+            return res.status(404).json({ message: "User not found" });
+        }
+
+        // Check if product exists in wishlist
+        const isInWishlist = (user.wishlist ?? []).includes( new mongoose.Types.ObjectId(productId));
+
+
+        if (!isInWishlist) {
+            return res.status(400).json({ message: "Product not found in wishlist" });
+        }
 
         await User.findByIdAndUpdate(
             userId,

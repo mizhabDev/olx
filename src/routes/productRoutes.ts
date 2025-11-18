@@ -1,12 +1,13 @@
 
 import {
+    buyProduct,
     createProduct,
     getProductDetails
 }  from "../controllers/productController";
 
 import { Router } from "express";
 import { verifyToken } from "../middlewares/authMiddleware";
-import { buyProduct } from "../controllers/pageController";
+
 const router = Router();
 
 
@@ -24,3 +25,4 @@ router.get("/:id", verifyToken,getProductDetails);
 
 export default router;
 
+  
