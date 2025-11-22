@@ -17,7 +17,7 @@ const router = Router();
 
 // post router
 router.post('/', verifyToken,createProduct);
-router.get('/buy',verifyToken,buyProduct)
+router.post('/buy',verifyToken,buyProduct)
 router.get("/:id", verifyToken,getProductDetails);
 
 
