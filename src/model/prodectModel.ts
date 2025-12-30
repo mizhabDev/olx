@@ -13,12 +13,22 @@ export const productSchema = new Schema<IProduct>({
     },
     productLocation: {
         type:String,
-        require:true
+        require:true,
+        trim:true
     },
-    productPhotoSrc: String,
+     productPhotoSrc: {
+      type: [String],           // 👈 array of strings
+      required: true,
+      validate: {
+        validator: (v) => Array.isArray(v) && v.length > 0,
+        message: "At least one product image is required",
+      },
+    },
     productCatogery:{
         type:String,
         default:"other",
+        require:true
+        
     },
     isSold:{
         type:Boolean,

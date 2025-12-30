@@ -10,10 +10,22 @@ import passport from "./config/passport";
 import wishlistRoutes from "./routes/wishListRoutes";
 import messageRoutes from './routes/messageRoutes';
 import dotenv from "dotenv";
+import path from "path";
+import cors from "cors";
 dotenv.config()
 
 
 const app = express();
+
+app.use(
+  cors({
+    origin: "http://localhost:5173", // your frontend
+    credentials: true,
+    methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+  })
+);
+
 
 // Middlewares
 app.use(express.json());
@@ -30,6 +42,9 @@ app.use(
 
 app.use(passport.initialize());
 // app.use(passport.session());
+
+//upload configuration 
+app.use("/uploads", express.static(path.join(__dirname, "../uploads")));
 
 
 // auth Routes

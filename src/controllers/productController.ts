@@ -1,71 +1,76 @@
-import { Response } from "express";
+import { RequestHandler, Response } from "express";
 import { Product } from "../model/prodectModel";
 import { AuthRequest } from "../types/auth";
 import mongoose from "mongoose";
 import { Order } from "../model/orderModel";
 
-
-
-
-export const createProduct = async (req: AuthRequest, res: Response) => {
-
+export const createProduct:RequestHandler = async (req, res) => {
   try {
+    const authReq = req as AuthRequest;
+    console.log("req.files:", authReq.files);
+    console.log("req.body:", authReq.body);
 
-    if (!req.user?._id) {
+    if (!authReq.user?._id) {
       return res.status(401).json({ message: "Unauthorized: User not found" });
     }
 
     //  Ensure req.body exists and is not empty
-    if (!req.body || Object.keys(req.body).length === 0) {
+    if (!authReq.body || Object.keys(req.body).length === 0) {
       return res.status(400).json({
-        message: "Request body cannot be empty"
+        message: "Request body cannot be empty",
       });
     }
 
+    const { productName, productPrice, productLocation, productCatogery } =
+      req.body;
+    console.log("user details fron createProduct", authReq.user);
 
-    const {
-      productName,
-      productPrice,
-      productLocation,
-      productPhotoSrc,
-      productCatogery,
-    } = req.body;
-    console.log("user details fron createProduct", req.user);
-
-    if (!productName || !productPrice || !productLocation || !productCatogery) {
+    const files = authReq.files as Express.Multer.File[];
+   
+    if (!files || files.length === 0) {
       return res.status(400).json({
-        message: "Missing required product fields"
+        message: "At least one product image is required",
       });
     }
 
+    const imagePaths = files.map(
+      (file) => `/uploads/products/${file.filename}`
+    );
 
+    if (
+      productName == null ||
+      productPrice == null ||
+      productLocation == null ||
+      productCatogery == null
+    ) {
+      return res.status(400).json({
+        message: "Missing required product fields",
+      });
+    }
 
+    console.log("this is imagePath :", imagePaths);
+    console.log("Uploaded files count:", files.length);
 
     const newProduct = new Product({
       productName,
       productPrice,
       productLocation,
-      productPhotoSrc,
+      productPhotoSrc: imagePaths,
       productCatogery,
       createdBy: {
-        _id: req.user?._id,
-        email: req.user?.email
-      }
+        _id: authReq.user?._id,
+        email: authReq.user?.email,
+      },
     });
 
     await newProduct.save();
 
     res.status(201).json({ message: "Product created", product: newProduct });
-  }
-
-  catch (error) {
+  } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Interal Server Error" });
   }
 };
-
-
-
 
 // Get Single Product by ID
 export const getProductDetails = async (req: AuthRequest, res: Response) => {
@@ -74,14 +79,18 @@ export const getProductDetails = async (req: AuthRequest, res: Response) => {
 
     // Validate ID format
     if (!mongoose.Types.ObjectId.isValid(id)) {
-      return res.status(400).json({ success: false, message: "Invalid product ID format" });
+      return res
+        .status(400)
+        .json({ success: false, message: "Invalid product ID format" });
     }
 
     // Fetch the product from MongoDB
     const product = await Product.findById(id);
 
     if (!product) {
-      return res.status(404).json({ success: false, message: "Product not found" });
+      return res
+        .status(404)
+        .json({ success: false, message: "Product not found" });
     }
 
     return res.status(200).json({ success: true, data: product });
@@ -91,18 +100,18 @@ export const getProductDetails = async (req: AuthRequest, res: Response) => {
   }
 };
 
-
 export const buyProduct = async (req: AuthRequest, res: Response) => {
   try {
     if (!req.user || !req.user._id) {
-      return res.status(401).json({ message: "Unauthorized: Please login first" });
+      return res
+        .status(401)
+        .json({ message: "Unauthorized: Please login first" });
     }
 
     const userId = req.user._id;
 
     const { productId } = req.body;
     console.log("this is from request body", req.body);
-
 
     if (!productId) {
       return res.status(400).json({ message: "Product ID is required" });
@@ -119,7 +128,9 @@ export const buyProduct = async (req: AuthRequest, res: Response) => {
     }
 
     if (!userId) {
-      return res.status(401).json({ message: "Unauthorized: Please login first" });
+      return res
+        .status(401)
+        .json({ message: "Unauthorized: Please login first" });
     }
     if (!product.createdBy._id) {
       console.log("created id not find");
@@ -127,10 +138,12 @@ export const buyProduct = async (req: AuthRequest, res: Response) => {
     }
 
     if (product.createdBy._id.toString() === userId.toString()) {
-      return res.status(400).json({ message: "You cannot buy your own product" });
+      return res
+        .status(400)
+        .json({ message: "You cannot buy your own product" });
     }
 
-    // Create order 
+    // Create order
     const order = await Order.create({
       buyer: userId,
       seller: product.createdBy._id,
