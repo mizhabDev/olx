@@ -42,7 +42,7 @@ export const userExist = async (req: Request<{}, {}, typeUser>, res: Response): 
       return res.status(400).json({ message: "Password is required" });
     }
     if (!user.password) {
-      return res.status(400).json({ message: "User has no Password google sign required" });
+      return res.status(400).json({ message: "The User has been already sign in with google.Sign in with google" });
     }
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
@@ -312,7 +312,7 @@ export const verifyOtp = async (req: AuthRequest, res: Response) => {
       message: "Server error. Please try again later.",
     });
   }
-};
+}; 
 
 
 
@@ -331,13 +331,14 @@ export const googleCallback = (req: AuthRequest, res: Response) => {
 
 
     const { token } = userData;
+    console.log("your tken is :",token);
 
     // Store JWT token in cookie
     res.cookie("token", token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "lax",
-      maxAge: 60 * 60 * 1000, // 1 hour
+      maxAge: 60 * 60 * 1000, // 1 hour 
       path: "/"
     });
 
@@ -345,7 +346,8 @@ export const googleCallback = (req: AuthRequest, res: Response) => {
       token recived from google callback: ${token}
     ---------------`);
 
-    return res.redirect("/success");
+   return res.redirect("http://localhost:5173/oauth-success");
+
 
 
 
@@ -353,7 +355,11 @@ export const googleCallback = (req: AuthRequest, res: Response) => {
     console.error("Google login error:", error);
     return res.redirect("/login");
   }
-};
+};   
+     
+
+
+
 
 
 

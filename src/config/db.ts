@@ -14,7 +14,7 @@ const connectDB = async () => {
   try {
     // use non-null assertion so TS knows db is a string here
     const conn = await mongoose.connect(db!);
-    console.log(`MongoDB Connected succeess`);
+    console.log(`MongoDB Connected succeess `);
   } catch (error) {
     console.error(`Error while connecting to mongodb: ${(error as Error).message}`);
     process.exit(1);
@@ -22,3 +22,4 @@ const connectDB = async () => {
 };
 
 export default connectDB;
+ 
