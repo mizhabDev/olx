@@ -42,8 +42,8 @@ router.get("/me", (req, res) => {
 });
 
 
-router.get('/forgetPassword',forgotPassword);
-router.post("/reset-password/:token", resetPassword);
+router.post('/forgetPassword',forgotPassword);
+router.post("/reset-password/:token", resetPassword); 
 
 
 

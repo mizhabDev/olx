@@ -370,39 +370,56 @@ export const forgotPassword = async (req: Request, res: Response) => {
 
     const user = await User.findOne({ email });
 
+    // ❗ Security note:
+    // In production, you may want to return 200 even if user not found
     if (!user) {
-      return res.status(404).json({ success: false, message: "User not found" });
-    }
-    if (!user.isVerified) {
-      return res.status(404).json({ success: false, message: "User not verified" });
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
     }
 
-    // Generate a reset token
+    if (!user.isVerified) {
+      return res.status(403).json({
+        success: false,
+        message: "User not verified",
+      });
+    }
+
+    // Generate reset token (raw)
     const resetToken = crypto.randomBytes(20).toString("hex");
 
-    // Hash token and save in DB (safer)
-    const hashedToken = crypto.createHash("sha256").update(resetToken).digest("hex");
+    // Hash token before saving
+    const hashedToken = crypto
+      .createHash("sha256")
+      .update(resetToken)
+      .digest("hex");
 
     user.resetPasswordToken = hashedToken;
-    user.resetPasswordExpire = new Date(Date.now() + 10 * 60 * 1000); // 10 mins
+    user.resetPasswordExpire = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
     await user.save();
 
-    // Create reset link (from environment variable)
-    const baseUrl = `${req.protocol}://${req.get("host")}`;
-    const resetURL = `${baseUrl.replace(/\/$/, "")}/api/auth/reset-password/${hashedToken}`;
+    console.log("RAW token emailed:", resetToken); 
+console.log("HASH stored:", hashedToken);
 
+
+    // ✅ FRONTEND reset link (NOT backend)
+    const frontendURL = process.env.CLINT_URL;
+
+    if (!frontendURL) {
+      throw new Error("FRONTEND_URL not configured");
+    }
+
+    const resetURL = `${frontendURL.replace(/\/$/, "")}/reset-password/${resetToken}`;
 
     console.log("Password reset URL:", resetURL);
 
-
-    //  Reset Email password
+    // Send email
     await sendEmail(
       email,
       "Password Reset Request",
       passwordResetEmailTemplate(user.name, resetURL)
     );
-
-
 
     res.status(200).json({
       success: true,
@@ -411,9 +428,13 @@ export const forgotPassword = async (req: Request, res: Response) => {
 
   } catch (error) {
     console.error("Error in forgotPassword:", error);
-    res.status(500).json({ success: false, message: "Server error" });
+    res.status(500).json({
+      success: false,
+      message: "Server error",
+    });
   }
 };
+
 
 
 // 🔹 Step 2: Reset password
@@ -431,12 +452,21 @@ export const resetPassword = async (req: AuthRequest, res: Response) => {
       });
     }
 
+    const hashedToken = crypto
+      .createHash("sha256")
+      .update(token)
+      .digest("hex");
 
     const user = await User.findOne({
-      resetPasswordToken: token,
+      resetPasswordToken: hashedToken,
       resetPasswordExpire: { $gt: new Date() },
     });
 
+    console.log(user);
+    console.log("RAW token emailed:",token);
+console.log("HASH stored:", hashedToken);
+
+ 
     if (!user) {
       return res.status(400).json({ success: false, message: "Invalid or expired token" });
     }
