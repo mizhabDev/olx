@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chat with <%= user.email %>
+  </title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f5f7fa;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+    }
+
+    .header {
+      background-color: #007bff;
+      color: white;
+      padding: 15px;
+      text-align: center;
+      font-size: 1.2rem;
+      font-weight: bold;
+    }
+
+    .chat-container {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      background: #fff;
+      margin: 20px auto;
+      width: 90%;
+      max-width: 500px;
+      border-radius: 10px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+      overflow: hidden;
+    }
+
+    .messages {
+      flex: 1;
+      padding: 15px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .message {
+      padding: 10px 15px;
+      border-radius: 20px;
+      max-width: 75%;
+    }
+
+    .sent {
+      background-color: #007bff;
+      color: white;
+      align-self: flex-end;
+    }
+
+    .received {
+      background-color: #e5e5e5;
+      color: #333;
+      align-self: flex-start;
+    }
+
+    .message-input {
+      display: flex;
+      padding: 10px;
+      border-top: 1px solid #ccc;
+      background-color: #f9f9f9;
+    }
+
+    .message-input input {
+      flex: 1;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 20px;
+      outline: none;
+      font-size: 1rem;
+    }
+
+    .message-input button {
+      background-color: #007bff;
+      color: white;
+      border: none;
+      padding: 10px 18px;
+      margin-left: 10px;
+      border-radius: 20px;
+      cursor: pointer;
+      font-weight: bold;
+      transition: background 0.2s;
+    }
+
+    .message-input button:hover {
+      background-color: #0056b3;
+    }
+
+    .back-btn {
+      position: absolute;
+      top: 15px;
+      left: 15px;
+      color: white;
+      background: rgba(255, 255, 255, 0.2);
+      border: none;
+      padding: 5px 10px;
+      border-radius: 10px;
+      cursor: pointer;
+      font-weight: bold;
+      transition: background 0.2s;
+    }
+
+    .back-btn:hover {
+      background: rgba(255, 255, 255, 0.4);
+    }
+  </style>
+  <script src="/socket.io/socket.io.js"></script>
+</head>
+
+<body>
+  <div class="header">
+    <button class="back-btn" onclick="window.location.href='/page/selectEmail'">← Back</button>
+    Chat with <%= user.email %>
+  </div>
+
+  <div class="chat-container">
+    <div id="messages" class="messages">
+      <!-- Example static messages -->
+      <div class="message received">Hey there 👋</div>
+      <div class="message sent">Hi! How are you?</div>
+    </div>
+
+    <div class="message-input">
+      <input type="text" id="messageInput" placeholder="Type a message..." />
+      <button id="sendBtn">Send</button>
+    </div>
+  </div>
+
+  <script>
+    const sendBtn = document.getElementById("sendBtn");
+    const messageInput = document.getElementById("messageInput");
+    const messagesDiv = document.getElementById("messages");
+    const senderEmail = "<%= admin.email %>";
+    const receiverEmail = "<%= user.email %>"
+
+    const socket = io({
+      auth: {
+        senderEmail,
+        receiverEmail
+      }
+    });
+
+
+    
+
+    // ✅ 1. Load previous chat history
+    socket.on("chatHistory", (history) => {
+      messagesDiv.innerHTML = "";
+
+      history.forEach((msg) => {
+        const msgDiv = document.createElement("div");
+        msgDiv.classList.add("message");
+
+
+        if (msg.senderEmail === senderEmail) {
+          msgDiv.classList.add("sent");
+        } else {
+          msgDiv.classList.add("received");
+        }
+
+        msgDiv.textContent = msg.message;
+        messagesDiv.appendChild(msgDiv);
+
+
+      });
+      // always scroll to bottom
+      messagesDiv.scrollTop = messagesDiv.scrollHeight;
+
+    });
+
+
+    // ✅ when user clicks Send
+    sendBtn.addEventListener("click", () => {
+      const message = messageInput.value.trim();
+      if (!message) return;
+
+      // send message to backend
+
+      socket.emit("message", {
+        text: message,
+        senderEmail,
+        receiverEmail,
+      });
+
+      // clear input
+      messageInput.value = "";
+    });
+
+    // ✅ when any message is received from server
+    socket.on("message", (data) => {
+      const msgDiv = document.createElement("div");
+      msgDiv.classList.add("message");
+
+      // Check if the message came from me
+      if (data.senderEmail === senderEmail) {
+        msgDiv.classList.add("sent");     // admin’s own message
+      } else {
+        msgDiv.classList.add("received"); // client’s message
+      }
+
+      msgDiv.textContent = data.text;
+      messagesDiv.appendChild(msgDiv);
+
+      // always scroll to bottom
+      messagesDiv.scrollTop = messagesDiv.scrollHeight;
+    });
+  </script>
+
+
+</body>
+
+</html>
