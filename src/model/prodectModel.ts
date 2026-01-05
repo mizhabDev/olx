@@ -30,11 +30,14 @@ export const productSchema = new Schema<IProduct>({
         require:true
         
     },
+<<<<<<< HEAD
     productDescription:{
         type:String,
         require:true
 
     },
+=======
+>>>>>>> 3d134bec2c95c644ba27a7994033fba0c7fd6bb2
     isSold:{
         type:Boolean,
         default:false

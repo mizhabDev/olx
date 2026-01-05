@@ -5,6 +5,10 @@ import { log } from "console";
 import { User } from "../model/userModel";
 import jwt from "jsonwebtoken";
 import { Admin } from "../model/adminModel";
+<<<<<<< HEAD
+=======
+
+>>>>>>> 3d134bec2c95c644ba27a7994033fba0c7fd6bb2
 import { Page } from "../model/pageModel";
 
 
@@ -15,7 +19,11 @@ export const getHomePage = async (req: Request, res: Response) => {
     const filter: any = {};
 
     const pageNumber = Number(page);
+<<<<<<< HEAD
     const limit = 16;
+=======
+    const limit = 6;
+>>>>>>> 3d134bec2c95c644ba27a7994033fba0c7fd6bb2
     const skip = (pageNumber - 1) * limit;
 
     //  Text search (name or category)
@@ -43,7 +51,13 @@ export const getHomePage = async (req: Request, res: Response) => {
     }
 
     //  Fetch data
+<<<<<<< HEAD
     const products = await Product.find();
+=======
+    const products = await Product.find(filter)
+      .skip(skip)
+      .limit(limit);
+>>>>>>> 3d134bec2c95c644ba27a7994033fba0c7fd6bb2
 
     res.status(200).json(products);
 

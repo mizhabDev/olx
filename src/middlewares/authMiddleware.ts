@@ -8,7 +8,10 @@ import { AuthRequest } from "../types/auth";
 export const verifyToken = (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
     const token =req.cookies?.token || req.headers.authorization?.split(" ")[1];
+<<<<<<< HEAD
     
+=======
+>>>>>>> 3d134bec2c95c644ba27a7994033fba0c7fd6bb2
 
     if (!token) {
       return res.status(401).json({ message: "Access denied, no token provided" });
