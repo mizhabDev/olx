@@ -15,7 +15,7 @@ export const getHomePage = async (req: Request, res: Response) => {
       minPrice,
       maxPrice,
       price,
-      page = "1",
+      page,
     } = req.query;
     const filter: any = {};
 
@@ -54,7 +54,7 @@ export const getHomePage = async (req: Request, res: Response) => {
     const products = await Product.find(filter)
       .skip(skip)
       .limit(limit)
-      .sort({ createdAt: -1 });
+      .sort({ createdAt: -1 });                          
 
     const totalPages = Math.ceil(totalItems / limit);
     const hasMore = pageNumber < totalPages
