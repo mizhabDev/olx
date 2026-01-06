@@ -5,25 +5,22 @@ import { log } from "console";
 import { User } from "../model/userModel";
 import jwt from "jsonwebtoken";
 import { Admin } from "../model/adminModel";
-<<<<<<< HEAD
-=======
-
->>>>>>> 3d134bec2c95c644ba27a7994033fba0c7fd6bb2
 import { Page } from "../model/pageModel";
-
-
 
 export const getHomePage = async (req: Request, res: Response) => {
   try {
-    const { search, location, minPrice, maxPrice, price ,page = "1" } = req.query;
+    const {
+      search,
+      location,
+      minPrice,
+      maxPrice,
+      price,
+      page = "1",
+    } = req.query;
     const filter: any = {};
 
     const pageNumber = Number(page);
-<<<<<<< HEAD
     const limit = 16;
-=======
-    const limit = 6;
->>>>>>> 3d134bec2c95c644ba27a7994033fba0c7fd6bb2
     const skip = (pageNumber - 1) * limit;
 
     //  Text search (name or category)
@@ -50,16 +47,30 @@ export const getHomePage = async (req: Request, res: Response) => {
       if (maxPrice) filter.productPrice.$lte = Number(maxPrice);
     }
 
-    //  Fetch data
-<<<<<<< HEAD
-    const products = await Product.find();
-=======
+    // Total count
+    const totalItems = await Product.countDocuments(filter);
+
+    // Fetch paginated data
     const products = await Product.find(filter)
       .skip(skip)
-      .limit(limit);
->>>>>>> 3d134bec2c95c644ba27a7994033fba0c7fd6bb2
+      .limit(limit)
+      .sort({ createdAt: -1 });
 
-    res.status(200).json(products);
+    const totalPages = Math.ceil(totalItems / limit);
+    const hasMore = pageNumber < totalPages
+
+    res.status(200).json({
+      success: true,
+      message: "Products fetched successfully",
+      products,
+      pagination: {
+        currentPage: pageNumber,
+        totalPages,
+        totalItems,
+        limit,
+        hasMore,
+      },
+    });
 
   } catch (error) {
     console.error("Error fetching products:", error);
@@ -67,13 +78,9 @@ export const getHomePage = async (req: Request, res: Response) => {
   }
 };
 
-
-
 export const getLoginPage = (req: Request, res: Response) => {
-  res.render("login")
-}; 
-
-
+  res.render("login");
+};
 
 export const getSelectEmail = async (req: AuthRequest, res: Response) => {
   try {
@@ -82,23 +89,20 @@ export const getSelectEmail = async (req: AuthRequest, res: Response) => {
 
     // ✅ Render admin page with user list
     res.render("admin-slt-email", {
-      users
+      users,
     });
-    log(users)
+    log(users);
   } catch (error) {
     console.error("Error loading admin page:", error);
     res.status(500).send("Internal Server Error");
   }
 };
 
-
 export const getAdminLoginPage = (req: AuthRequest, res: Response) => {
   res.render("admin-login", {
-    message: "welcome admin"
-  })
+    message: "welcome admin",
+  });
 };
-
-
 
 export const postAdminDetails = async (req: Request, res: Response) => {
   console.log("Admin login request body:", req.body);
@@ -108,7 +112,7 @@ export const postAdminDetails = async (req: Request, res: Response) => {
   try {
     const admin = await Admin.findOne({ email });
     if (!admin) {
-      log("admin not found")
+      log("admin not found");
       return res.render("admin-login", { message: "Admin not found!" });
     }
 
@@ -141,18 +145,15 @@ export const postAdminDetails = async (req: Request, res: Response) => {
   }
 };
 
-
-
-
-
-
 export const getPage = async (req: Request, res: Response) => {
   try {
     const { slug } = req.params;
     const page = await Page.findOne({ slug });
 
     if (!page) {
-      return res.status(404).json({ success: false, message: "Page not found" });
+      return res
+        .status(404)
+        .json({ success: false, message: "Page not found" });
     }
 
     res.status(200).json({ success: true, data: page });
@@ -161,4 +162,3 @@ export const getPage = async (req: Request, res: Response) => {
     res.status(500).json({ success: false, message: "Server error" });
   }
 };
-

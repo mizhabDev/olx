@@ -116,15 +116,12 @@ export const createUser = async (req: Request, res: Response) => {
 
         return res.json({ message: "OTP resent. Please verify your email." });
       }
-<<<<<<< HEAD
       else{
         // 🔹 User already verified → block duplicate registration
     return res.status(409).json({
       message: "User already exists and is verified. Please log in.",
     });
       }
-=======
->>>>>>> 3d134bec2c95c644ba27a7994033fba0c7fd6bb2
 
     }
 

@@ -3,6 +3,9 @@ import { Product } from "../model/prodectModel";
 import { AuthRequest } from "../types/auth";
 import mongoose from "mongoose";
 import { Order } from "../model/orderModel";
+import { Request } from "express";
+import { Multer } from "multer";
+
 
 export const createProduct:RequestHandler = async (req, res) => {
   try {
@@ -21,15 +24,11 @@ export const createProduct:RequestHandler = async (req, res) => {
       });
     }
 
-<<<<<<< HEAD
     const { productName, productPrice, productLocation, productCatogery, productDescription} =
-=======
-    const { productName, productPrice, productLocation, productCatogery } =
->>>>>>> 3d134bec2c95c644ba27a7994033fba0c7fd6bb2
       req.body;
     console.log("user details fron createProduct", authReq.user);
 
-    const files = authReq.files as Express.Multer.File[];
+    const files = authReq.files as Express.Multer.File[]; 
    
     if (!files || files.length === 0) {
       return res.status(400).json({
@@ -40,21 +39,13 @@ export const createProduct:RequestHandler = async (req, res) => {
     const imagePaths = files.map(
       (file) => `/uploads/products/${file.filename}`
     );
-<<<<<<< HEAD
  
-=======
-
->>>>>>> 3d134bec2c95c644ba27a7994033fba0c7fd6bb2
     if (
       productName == null ||
       productPrice == null ||
       productLocation == null ||
-<<<<<<< HEAD
       productCatogery == null ||
       productDescription == null
-=======
-      productCatogery == null
->>>>>>> 3d134bec2c95c644ba27a7994033fba0c7fd6bb2
     ) {
       return res.status(400).json({
         message: "Missing required product fields",
@@ -70,10 +61,7 @@ export const createProduct:RequestHandler = async (req, res) => {
       productLocation,
       productPhotoSrc: imagePaths,
       productCatogery,
-<<<<<<< HEAD
       productDescription,
-=======
->>>>>>> 3d134bec2c95c644ba27a7994033fba0c7fd6bb2
       createdBy: {
         _id: authReq.user?._id,
         email: authReq.user?.email,
@@ -173,10 +161,7 @@ export const buyProduct = async (req: AuthRequest, res: Response) => {
     product.isSold = true;
     await product.save();
 
-<<<<<<< HEAD
  
-=======
->>>>>>> 3d134bec2c95c644ba27a7994033fba0c7fd6bb2
     return res.status(200).json({
       message: "Product purchased successfully",
       order,
