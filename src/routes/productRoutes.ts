@@ -2,8 +2,9 @@
 import {
     buyProduct,
     createProduct,
-    getProductDetails
-}  from "../controllers/productController";
+    getProductDetails,
+    deleteProduct
+} from "../controllers/productController";
 
 import { Router } from "express";
 import { verifyToken } from "../middlewares/authMiddleware";
@@ -17,14 +18,14 @@ const router = Router();
 
 
 // post router
-router.post('/', verifyToken,uploadProductImage.array("productImage"),createProduct);
+router.post('/', verifyToken, uploadProductImage.array("productImage"), createProduct);
 
-router.post('/buy',verifyToken,buyProduct)
-router.get("/:id", verifyToken,getProductDetails);
+router.post('/buy', verifyToken, buyProduct)
+router.get("/:id", verifyToken, getProductDetails);
+router.delete("/:id", verifyToken, deleteProduct);
 
 
 
 
 export default router;
 
-  

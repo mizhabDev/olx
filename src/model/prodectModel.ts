@@ -44,13 +44,6 @@ export const productSchema = new Schema<IProduct>({
         _id:{
             type:String,
         },
-        name: {
-            type:String, 
-            default: "Admin"
-        },
-        email:{
-            type:String,
-        },
         date: { 
             type: Date, 
             default: Date.now 

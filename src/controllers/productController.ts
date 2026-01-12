@@ -3,8 +3,7 @@ import { Product } from "../model/prodectModel";
 import { AuthRequest } from "../types/auth";
 import mongoose from "mongoose";
 import { Order } from "../model/orderModel";
-import { Request } from "express";
-import { Multer } from "multer";
+import { Express } from "express";
 
 
 export const createProduct: RequestHandler = async (req, res) => {
@@ -27,6 +26,8 @@ export const createProduct: RequestHandler = async (req, res) => {
     const { productName, productPrice, productLocation, productCatogery, productDescription } =
       req.body;
     console.log("user details fron createProduct", authReq.user);
+
+
 
     const files = authReq.files as Express.Multer.File[];
 
@@ -64,7 +65,6 @@ export const createProduct: RequestHandler = async (req, res) => {
       productDescription,
       createdBy: {
         _id: authReq.user?._id,
-        email: authReq.user?.email,
       },
     });
 
@@ -169,5 +169,47 @@ export const buyProduct = async (req: AuthRequest, res: Response) => {
   } catch (error) {
     console.error("Buy Product Error:", error);
     return res.status(500).json({ message: "from here  Server Error", error });
+  }
+};
+
+
+// Delete Product by ID
+export const deleteProduct: RequestHandler = async (req, res) => {
+  try {
+    const authReq = req as AuthRequest;
+    const id = req.params.id as string;
+
+    // Check if user is authenticated
+    if (!authReq.user?._id) {
+      return res.status(401).json({ success: false, message: "Unauthorized" });
+    }
+
+    // Validate ID format
+    if (!id || !mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ success: false, message: "Invalid product ID format" });
+    }
+
+    // Find the product
+    const product = await Product.findById(id);
+
+    if (!product) {
+      return res.status(404).json({ success: false, message: "Product not found" });
+    }
+
+    // Check if the user owns this product
+    if (product.createdBy._id?.toString() !== authReq.user._id.toString()) {
+      return res.status(403).json({ success: false, message: "You can only delete your own products" });
+    }
+
+    // Delete the product
+    await Product.findByIdAndDelete(id);
+
+    return res.status(200).json({
+      success: true,
+      message: "Product deleted successfully"
+    });
+  } catch (error) {
+    console.error("Delete Product Error:", error);
+    return res.status(500).json({ success: false, message: "Server Error" });
   }
 };

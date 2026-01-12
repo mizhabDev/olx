@@ -12,6 +12,8 @@ import messageRoutes from './routes/messageRoutes';
 import dotenv from "dotenv";
 import path from "path";
 import cors from "cors";
+import myListRoutes from "./routes/myListRoutes";
+
 dotenv.config()
 
 
@@ -66,6 +68,9 @@ app.use("/api/page", pageRoutes);
 
 // messageRoutes
 app.use("/api/message",messageRoutes);
+
+//myListRoutes
+app.use("/api/my-listings",myListRoutes);
 
  
 
