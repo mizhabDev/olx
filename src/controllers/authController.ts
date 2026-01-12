@@ -116,11 +116,11 @@ export const createUser = async (req: Request, res: Response) => {
 
         return res.json({ message: "OTP resent. Please verify your email." });
       }
-      else{
+      else {
         // 🔹 User already verified → block duplicate registration
-    return res.status(409).json({
-      message: "User already exists and is verified. Please log in.",
-    });
+        return res.status(409).json({
+          message: "User already exists and is verified. Please log in.",
+        });
       }
 
     }
@@ -318,7 +318,7 @@ export const verifyOtp = async (req: AuthRequest, res: Response) => {
       message: "Server error. Please try again later.",
     });
   }
-}; 
+};
 
 
 
@@ -337,7 +337,7 @@ export const googleCallback = (req: AuthRequest, res: Response) => {
 
 
     const { token } = userData;
-    console.log("your tken is :",token);
+    console.log("your tken is :", token);
 
     // Store JWT token in cookie
     res.cookie("token", token, {
@@ -352,7 +352,7 @@ export const googleCallback = (req: AuthRequest, res: Response) => {
       token recived from google callback: ${token}
     ---------------`);
 
-   return res.redirect("http://localhost:5173/oauth-success");
+    return res.redirect("http://localhost:5173/oauth-success");
 
 
 
@@ -361,8 +361,8 @@ export const googleCallback = (req: AuthRequest, res: Response) => {
     console.error("Google login error:", error);
     return res.redirect("/login");
   }
-};   
-     
+};
+
 
 
 
@@ -405,8 +405,8 @@ export const forgotPassword = async (req: Request, res: Response) => {
     user.resetPasswordExpire = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
     await user.save();
 
-    console.log("RAW token emailed:", resetToken); 
-console.log("HASH stored:", hashedToken);
+    console.log("RAW token emailed:", resetToken);
+    console.log("HASH stored:", hashedToken);
 
 
     // ✅ FRONTEND reset link (NOT backend)
@@ -451,7 +451,7 @@ export const resetPassword = async (req: AuthRequest, res: Response) => {
     const { newPassword } = req.body || {};
     console.log(token, newPassword);
 
-    if (!token || !newPassword) {
+    if (!token || typeof token !== 'string' || !newPassword) {
       return res.status(400).json({
         success: false,
         message: "Token and new password are required"
@@ -460,7 +460,7 @@ export const resetPassword = async (req: AuthRequest, res: Response) => {
 
     const hashedToken = crypto
       .createHash("sha256")
-      .update(token)
+      .update(token as string)
       .digest("hex");
 
     const user = await User.findOne({
@@ -469,10 +469,10 @@ export const resetPassword = async (req: AuthRequest, res: Response) => {
     });
 
     console.log(user);
-    console.log("RAW token emailed:",token);
-console.log("HASH stored:", hashedToken);
+    console.log("RAW token emailed:", token);
+    console.log("HASH stored:", hashedToken);
 
- 
+
     if (!user) {
       return res.status(400).json({ success: false, message: "Invalid or expired token" });
     }
@@ -492,6 +492,31 @@ console.log("HASH stored:", hashedToken);
   }
 };
 
+
+
+// Logout controller - clears the JWT token cookie
+export const logout = async (req: Request, res: Response) => {
+  try {
+    res.cookie("token", "", {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      maxAge: 0, // Expire immediately
+      path: "/"
+    });
+
+    return res.status(200).json({
+      success: true,
+      message: "Logged out successfully"
+    });
+  } catch (error) {
+    console.error("Logout error:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Server error during logout"
+    });
+  }
+};
 
 
 

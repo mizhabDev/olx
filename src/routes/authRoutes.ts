@@ -1,12 +1,13 @@
 import passport from "passport";
 import {
-    userExist,
-    createUser,
-    verifyOtp,
-    googleCallback,
-    forgotPassword,
-    resetPassword
-}  from "../controllers/authController";
+  userExist,
+  createUser,
+  verifyOtp,
+  googleCallback,
+  forgotPassword,
+  resetPassword,
+  logout
+} from "../controllers/authController";
 import { Router } from "express";
 import jwt from "jsonwebtoken";
 const router = Router();
@@ -16,10 +17,10 @@ const router = Router();
 // user authentication handling router
 router.post('/register', createUser);
 router.post('/login', userExist);
-router.post('/verifyOtp',verifyOtp);
+router.post('/verifyOtp', verifyOtp);
 
 //  Route to start Google login
-router.get("/google",passport.authenticate("google", { scope: ["profile", "email"] }));
+router.get("/google", passport.authenticate("google", { scope: ["profile", "email"] }));
 
 //  Callback route
 router.get(
@@ -42,11 +43,12 @@ router.get("/me", (req, res) => {
 });
 
 
-router.post('/forgetPassword',forgotPassword);
-router.post("/reset-password/:token", resetPassword); 
+router.post('/forgetPassword', forgotPassword);
+router.post("/reset-password/:token", resetPassword);
+
+// Logout route
+router.post('/logout', logout);
 
 
 
 export default router;
-
- 

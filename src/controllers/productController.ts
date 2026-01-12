@@ -7,7 +7,7 @@ import { Request } from "express";
 import { Multer } from "multer";
 
 
-export const createProduct:RequestHandler = async (req, res) => {
+export const createProduct: RequestHandler = async (req, res) => {
   try {
     const authReq = req as AuthRequest;
     console.log("req.files:", authReq.files);
@@ -24,12 +24,12 @@ export const createProduct:RequestHandler = async (req, res) => {
       });
     }
 
-    const { productName, productPrice, productLocation, productCatogery, productDescription} =
+    const { productName, productPrice, productLocation, productCatogery, productDescription } =
       req.body;
     console.log("user details fron createProduct", authReq.user);
 
-    const files = authReq.files as Express.Multer.File[]; 
-   
+    const files = authReq.files as Express.Multer.File[];
+
     if (!files || files.length === 0) {
       return res.status(400).json({
         message: "At least one product image is required",
@@ -39,7 +39,7 @@ export const createProduct:RequestHandler = async (req, res) => {
     const imagePaths = files.map(
       (file) => `/uploads/products/${file.filename}`
     );
- 
+
     if (
       productName == null ||
       productPrice == null ||
@@ -83,7 +83,7 @@ export const getProductDetails = async (req: AuthRequest, res: Response) => {
     const { id } = req.params;
 
     // Validate ID format
-    if (!mongoose.Types.ObjectId.isValid(id)) {
+    if (!id || typeof id !== 'string' || !mongoose.Types.ObjectId.isValid(id)) {
       return res
         .status(400)
         .json({ success: false, message: "Invalid product ID format" });
@@ -161,7 +161,7 @@ export const buyProduct = async (req: AuthRequest, res: Response) => {
     product.isSold = true;
     await product.save();
 
- 
+
     return res.status(200).json({
       message: "Product purchased successfully",
       order,

@@ -31,7 +31,7 @@ export const addToWishlist = async (req: AuthRequest, res: Response) => {
         res.status(200).json({ message: "Product added to wishlist" });
     } catch (error) {
         console.error(error);
-        res.status(500).json({ message: "Error adding to wishlist" }); 
+        res.status(500).json({ message: "Error adding to wishlist" });
     }
 };
 
@@ -47,8 +47,12 @@ export const removeFromWishlist = async (req: AuthRequest, res: Response) => {
             return res.status(404).json({ message: "User not found" });
         }
 
+        if (!productId || typeof productId !== 'string') {
+            return res.status(400).json({ message: "Invalid product ID" });
+        }
+
         // Check if product exists in wishlist
-        const isInWishlist = (user.wishlist ?? []).includes( new mongoose.Types.ObjectId(productId));
+        const isInWishlist = (user.wishlist ?? []).includes(new mongoose.Types.ObjectId(productId));
 
 
         if (!isInWishlist) {

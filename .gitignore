@@ -1,9 +1,5 @@
 node_modules
 dist
 .env
-<<<<<<< HEAD
 package-lock.json
 uploads
-=======
-package-lock.json
->>>>>>> 3d134bec2c95c644ba27a7994033fba0c7fd6bb2

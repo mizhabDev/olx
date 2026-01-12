@@ -1,35 +1,53 @@
-import mongoose, { Schema, Document } from "mongoose";
+import mongoose, { Schema, Document, Types } from "mongoose";
 
 export interface IMessage extends Document {
-  senderEmail: string;
-  receiverEmail: string;
+  _id: Types.ObjectId;
+  conversationId: Types.ObjectId;
+  sellerId: Types.ObjectId;
+  buyerId: Types.ObjectId;
+  senderId: Types.ObjectId; // Who actually sent this message (seller or buyer)
   message: string;
+  status: "sent" | "delivered" | "read";
   createdAt: Date;
-  roomId: string;
+  roomId?: string; // keeping for backward compatibility
 }
 
 const messageSchema = new Schema<IMessage>(
   {
-    senderEmail: {
-      type: String,
+    conversationId: {
+      type: Schema.Types.ObjectId,
+      ref: "Conversation",
       required: true,
-      lowercase: true,
-      trim: true,
+      index: true,
     },
-    receiverEmail: {
-      type: String,
+    sellerId: {
+      type: Schema.Types.ObjectId,
+      ref: "User",
       required: true,
-      lowercase: true,
-      trim: true,
+    },
+    buyerId: {
+      type: Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+    },
+    senderId: {
+      type: Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
     },
     message: {
       type: String,
       required: true,
       trim: true,
     },
+    status: {
+      type: String,
+      enum: ["sent", "delivered", "read"],
+      default: "sent",
+    },
     roomId: {
       type: String,
-      required: true,
+      required: false,
       index: true,
     },
   },

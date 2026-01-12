@@ -65,7 +65,7 @@ app.use("/api/page", pageRoutes);
 
 
 // messageRoutes
-app.use("/message",messageRoutes);
+app.use("/api/message",messageRoutes);
 
  
 
