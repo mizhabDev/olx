@@ -34,7 +34,9 @@ const fileFilter = (
     file.mimetype === "image/png" ||
     file.mimetype === "image/jpeg" ||
     file.mimetype === "image/jpg" ||
-    file.mimetype === "image/webp"
+    file.mimetype === "image/webp"||
+    file.mimetype === "image/avif"||
+    file.mimetype === "image/svg"
   ) {
     cb(null, true);
   } else {
