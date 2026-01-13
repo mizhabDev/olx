@@ -1,28 +1,42 @@
-import { Server } from "socket.io";
+import { Server, Socket } from "socket.io";
 import cookie from "cookie";
 import { decodeToken } from "../utils/jwt";
 import { Message } from "../model/messageModel";
+import { Conversation } from "../model/conversationModel";
+
+interface AuthenticatedSocket extends Socket {
+  data: {
+    user: {
+      _id: string;
+      email: string;
+      exp?: number;
+    };
+  };
+}
 
 export async function initSocket(io: Server) {
   // Middleware to verify token from cookie
-
   io.use((socket, next) => {
     try {
-      //  Access raw cookie header from handshake
+      // Access raw cookie header from handshake
       const cookieHeader = socket.handshake.headers.cookie;
       if (!cookieHeader) {
         return next(new Error("No cookies found"));
       }
 
-      //  Parse cookies
+      // Parse cookies
       const parsedCookies = cookie.parse(cookieHeader);
       const token = parsedCookies.token;
 
-      //decodeToken function
+      if (!token) {
+        return next(new Error("No token found in cookies"));
+      }
+
+      // Decode token
       const decoded = decodeToken(token);
       socket.data.user = decoded;
 
-      // 🕒 Auto-disconnect when token expires
+      // Auto-disconnect when token expires
       if (decoded.exp) {
         const expiresInMs = decoded.exp * 1000 - Date.now();
         if (expiresInMs <= 0) throw new Error("Token already expired");
@@ -36,94 +50,128 @@ export async function initSocket(io: Server) {
       }
 
       next();
-
     } catch (error) {
       console.log("❌ Auth failed:", error);
       next(new Error("Authentication failed"));
-
     }
   });
 
-  io.on("connection", async (socket) => {
-    const { senderEmail, receiverEmail } = socket.handshake.auth;
+  io.on("connection", (socket: AuthenticatedSocket) => {
+    const userId = socket.data.user._id;
+    console.log(`🟢 User connected: ${socket.data.user.email} (${socket.id})`);
 
-
-    if (!receiverEmail) { 
-      console.log("❌ Missing sender or target email target email",senderEmail  );
-      socket.disconnect();
-      return;
-    }
-
-
-    if (!senderEmail ) {
-      console.log("❌ Missing sender or target email",senderEmail);
-      socket.disconnect();
-      return;
-    }
-    
-    // ✅ Create a unique room ID based on both participants
-    const roomId = generateRoomId(senderEmail, receiverEmail);
-
-    // ✅ Join that room
-    socket.join(roomId);
-    console.log(`🟢 ${senderEmail} joined ${roomId}`);
-
-
-    // ✅ 1. Load old messages from MongoDB and send them to the user
-    try {
-      const previousMessages = await Message.find({ roomId })
-        .sort({ createdAt: 1 }) // oldest → newest
-        .lean();
-
-      socket.emit("chatHistory", previousMessages);
-      console.log(`📜 Sent ${previousMessages.length} old messages to ${senderEmail}`);
-    } catch (error) {
-      console.error("❌ Failed to load chat history:", error);
-    }
-
-
-
-    // ✅ Handle incoming messages
-    socket.on("message", async (data) => {
-      console.log(`💬 ${data.senderEmail} → ${data.receiverEmail}: ${data.text}`);
+    // ✅ Join a conversation room
+    socket.on("joinConversation", async ({ conversationId }) => {
+      if (!conversationId) {
+        console.log("❌ Missing conversationId");
+        return;
+      }
 
       try {
-        const { senderEmail, receiverEmail, text } = data;
+        // Verify user is part of this conversation
+        const conversation = await Conversation.findById(conversationId);
+        if (!conversation) {
+          console.log(`❌ Conversation not found: ${conversationId}`);
+          return;
+        }
 
-        // 🗃️ Save message to MongoDB
-        const messageDoc = new Message({
-          senderEmail,
-          receiverEmail,
-          message: text,
-          roomId,
-        });
+        const isBuyer = conversation.buyerId.toString() === userId;
+        const isSeller = conversation.sellerId.toString() === userId;
 
-        await messageDoc.save();
+        if (!isBuyer && !isSeller) {
+          console.log(`❌ User ${userId} not part of conversation ${conversationId}`);
+          return;
+        }
 
-        console.log(`💾 Saved message: ${senderEmail} → ${receiverEmail}`);
-
-        // 📤 Emit message to room
-        io.to(roomId).emit("message", {
-          senderEmail,
-          receiverEmail,
-          text,
-          createdAt: messageDoc.createdAt,
-        });
-
+        // Join the conversation room
+        socket.join(conversationId);
+        console.log(`📨 ${socket.data.user.email} joined conversation: ${conversationId}`);
       } catch (error) {
-        console.error("❌ Error saving message:", error);
+        console.error("❌ Error joining conversation:", error);
       }
     });
 
+    // ✅ Handle sending messages (for real-time broadcast after HTTP save)
+    socket.on("sendMessage", async ({ conversationId, message }) => {
+      if (!conversationId || !message) {
+        console.log("❌ Missing conversationId or message data");
+        return;
+      }
+
+      try {
+        // Broadcast the message to all users in the conversation room
+        // The message is already saved via HTTP, this just broadcasts it
+        const messageData = {
+          _id: message._id,
+          conversationId,
+          senderId: message.senderId,
+          message: message.message,
+          status: message.status || "sent",
+          createdAt: message.createdAt,
+        };
+
+        // Emit to all OTHER users in the room (not the sender)
+        socket.to(conversationId).emit("newMessage", messageData);
+        console.log(`💬 Message broadcast to room ${conversationId}`);
+      } catch (error) {
+        console.error("❌ Error broadcasting message:", error);
+      }
+    });
+
+    // ✅ Mark messages as read
+    socket.on("markAsRead", async ({ conversationId }) => {
+      if (!conversationId) {
+        console.log("❌ Missing conversationId for markAsRead");
+        return;
+      }
+
+      try {
+        // Update all unread messages in this conversation where user is NOT the sender
+        const result = await Message.updateMany(
+          {
+            conversationId,
+            senderId: { $ne: userId },
+            status: { $ne: "read" },
+          },
+          { $set: { status: "read" } }
+        );
+
+        if (result.modifiedCount > 0) {
+          // Notify other users in the room that messages were read
+          socket.to(conversationId).emit("messagesRead", {
+            conversationId,
+            readBy: userId,
+            count: result.modifiedCount,
+          });
+          console.log(`✅ Marked ${result.modifiedCount} messages as read in ${conversationId}`);
+        }
+      } catch (error) {
+        console.error("❌ Error marking messages as read:", error);
+      }
+    });
+
+    // ✅ Handle typing indicators
+    socket.on("typing", ({ conversationId, isTyping }) => {
+      if (!conversationId) return;
+
+      socket.to(conversationId).emit("userTyping", {
+        conversationId,
+        userId,
+        isTyping,
+      });
+    });
+
+    // ✅ Handle leaving a conversation room
+    socket.on("leaveConversation", ({ conversationId }) => {
+      if (conversationId) {
+        socket.leave(conversationId);
+        console.log(`👋 ${socket.data.user.email} left conversation: ${conversationId}`);
+      }
+    });
+
+    // ✅ Handle disconnect
     socket.on("disconnect", () => {
-      console.log(`🔴 ${senderEmail} left ${roomId}`);
+      console.log(`🔴 User disconnected: ${socket.data.user.email} (${socket.id})`);
     });
   });
-}
-
-// Helper function to generate consistent room IDs
-function generateRoomId(userEmail: string, adminEmail: string) {
-  // Sort emails alphabetically to ensure both sides get the same ID
-  const sorted = [userEmail, adminEmail].sort();
-  return `room-${sorted[0]}-${sorted[1]}`;
 }
