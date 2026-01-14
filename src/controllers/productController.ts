@@ -90,7 +90,7 @@ export const getProductDetails = async (req: AuthRequest, res: Response) => {
     }
 
     // Fetch the product from MongoDB
-    const product = await Product.findById(id);
+    const product = await Product.findById(id).populate("subCategory");
 
     if (!product) {
       return res

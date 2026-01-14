@@ -1,12 +1,13 @@
-import { Document } from "mongoose";
+import { Document, Types } from "mongoose";
 
 
-export interface IProduct extends Document {
+export interface IProduct {
   productName: string;
   productPrice: number;
   productLocation: String;
   productPhotoSrc: [string];
   productCatogery: string;
+  subCategory: Types.ObjectId;
   productDescription: String;
   isSold: Boolean;
   createdBy: {

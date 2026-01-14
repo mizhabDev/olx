@@ -1,4 +1,4 @@
-import  { model, Schema } from "mongoose";
+import  { model, Schema, Types } from "mongoose";
 import { IProduct } from "../types/product.types";
 
 
@@ -16,7 +16,7 @@ export const productSchema = new Schema<IProduct>({
         require:true,
         trim:true
     },
-     productPhotoSrc: {
+    productPhotoSrc: {
       type: [String],           // 👈 array of strings
       required: true,
       validate: {
@@ -24,10 +24,16 @@ export const productSchema = new Schema<IProduct>({
         message: "At least one product image is required",
       },
     },
+    
     productCatogery:{
         type:String,
         default:"other",
         require:true
+        
+    },
+    subCategory:{
+        type:Schema.Types.ObjectId,
+        ref:"SubCategory",
         
     },
     productDescription:{
