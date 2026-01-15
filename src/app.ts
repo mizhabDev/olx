@@ -5,7 +5,7 @@ import productRoutes from "./routes/productRoutes";
 import { errorHandler } from "./middlewares/errorHandler";
 import pageRoutes from "./routes/pageRoutes"
 import userRouter from "./routes/userRouter"
-import session  from "express-session";
+import session from "express-session";
 import passport from "./config/passport";
 import wishlistRoutes from "./routes/wishListRoutes";
 import messageRoutes from './routes/messageRoutes';
@@ -14,14 +14,18 @@ import path from "path";
 import cors from "cors";
 import myListRoutes from "./routes/myListRoutes";
 
-dotenv.config()
+dotenv.config();  
+
+// cloudinary configuration
+import "./config/cloudinary"; 
+
 
 
 const app = express();
 
 app.use(
   cors({
-    origin: "http://localhost:5173", // your frontend
+    origin: process.env.CLIENT_URL as string, 
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
@@ -34,11 +38,11 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser()); //reading cookie
 app.use(
-    session({
-        secret:process.env.SESSION_SECRET as string,
-        resave: false,
-        saveUninitialized: false,
-    })
+  session({
+    secret: process.env.SESSION_SECRET as string,
+    resave: false,
+    saveUninitialized: false,
+  })
 )
 
 
@@ -53,26 +57,26 @@ app.use("/uploads", express.static(path.join(__dirname, "../uploads")));
 app.use("/api/auth", authRoutes);
 
 //user router
-app.use("/api/user",userRouter)
+app.use("/api/user", userRouter)
 
 // Prouduct Routes
 app.use("/api/product", productRoutes);
 
 
 //wishlist pages
-app.use("/api/wishlist",wishlistRoutes)
+app.use("/api/wishlist", wishlistRoutes)
 
 // page Router
 app.use("/api/page", pageRoutes);
 
 
 // messageRoutes
-app.use("/api/message",messageRoutes);
+app.use("/api/message", messageRoutes);
 
 //myListRoutes
-app.use("/api/my-listings",myListRoutes);
+app.use("/api/my-listings", myListRoutes);
 
- 
+
 
 
 // test rotues
@@ -80,14 +84,13 @@ app.get("/success", (req, res) => {
   res.send("Login success ✅");
 });
 
-app.get("/login", (req, res) => { 
-  res.send("Login failed ❌"); 
+app.get("/login", (req, res) => {
+  res.send("Login failed ❌");
 });
 
 
 //error handling middleware
-app.use(errorHandler); 
- 
- 
-export default app; 
-  
+app.use(errorHandler);
+
+
+export default app;
