@@ -4,6 +4,8 @@ import { AuthRequest } from "../types/auth";
 import mongoose from "mongoose";
 import { Order } from "../model/orderModel";
 import { Express } from "express";
+import uploadToCloudinary from "../utils/cloudinaryHelper";
+import cloudinary from "../config/cloudinary";
 
 
 export const createProduct: RequestHandler = async (req, res) => {
@@ -23,13 +25,14 @@ export const createProduct: RequestHandler = async (req, res) => {
       });
     }
 
-    const { productName, productPrice, productLocation, productCatogery, productDescription } =
-      req.body;
+    const { productName, productPrice, productLocation, productCatogery, productDescription } = req.body;
     console.log("user details fron createProduct", authReq.user);
+    console.log("product details", req.body);
 
 
 
     const files = authReq.files as Express.Multer.File[];
+    console.log("files", files);
 
     if (!files || files.length === 0) {
       return res.status(400).json({
@@ -37,9 +40,10 @@ export const createProduct: RequestHandler = async (req, res) => {
       });
     }
 
-    const imagePaths = files.map(
-      (file) => `/uploads/products/${file.filename}`
+    const uploadedImages = await Promise.all(
+      files.map((file) => uploadToCloudinary(file))
     );
+
 
     if (
       productName == null ||
@@ -53,14 +57,17 @@ export const createProduct: RequestHandler = async (req, res) => {
       });
     }
 
-    console.log("this is imagePath :", imagePaths);
+    console.log("this is imagePath :", uploadedImages);
     console.log("Uploaded files count:", files.length);
 
     const newProduct = new Product({
       productName,
       productPrice,
       productLocation,
-      productPhotoSrc: imagePaths,
+      productPhotoSrc: uploadedImages.map(img => ({
+        url: img.secure_url,
+        public_id: img.public_id,
+      })),
       productCatogery,
       productDescription,
       createdBy: {
@@ -199,6 +206,10 @@ export const deleteProduct: RequestHandler = async (req, res) => {
     // Check if the user owns this product
     if (product.createdBy._id?.toString() !== authReq.user._id.toString()) {
       return res.status(403).json({ success: false, message: "You can only delete your own products" });
+    }
+
+    for (const img of product.productPhotoSrc) {
+      await cloudinary.uploader.destroy(img.public_id);
     }
 
     // Delete the product

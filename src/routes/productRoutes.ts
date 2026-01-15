@@ -20,7 +20,7 @@ const router = Router();
 
 
 // post router
-router.post('/', verifyToken, uploadProductImage.array("productImage"), createProduct);
+router.post('/', verifyToken, uploadProductImage.array("productImages", 10), createProduct);
 
 router.post('/addAdditionalDetails/:productId', verifyToken, addAdditionalDetails);
 
