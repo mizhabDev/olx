@@ -15,6 +15,9 @@ export const productSchema = new Schema<IProduct>({
         type: String,
         require: true,
         trim: true
+    },productCatogery:{
+        type:String,
+        require:true
     },
 
     productPhotoSrc: {
