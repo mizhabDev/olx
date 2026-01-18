@@ -49,6 +49,11 @@ app.use(
 app.use(passport.initialize());
 // app.use(passport.session());
 
+
+app.use("/", (req, res) => {
+  res.send("Hello World!");
+})
+
 //upload configuration 
 app.use("/uploads", express.static(path.join(__dirname, "../uploads")));
 
