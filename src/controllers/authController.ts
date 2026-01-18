@@ -410,7 +410,7 @@ export const forgotPassword = async (req: Request, res: Response) => {
 
 
     // ✅ FRONTEND reset link (NOT backend)
-    const frontendURL = process.env.CLINT_URL;
+    const frontendURL = process.env.CLIENT_URL;
 
     if (!frontendURL) {
       throw new Error("FRONTEND_URL not configured");
