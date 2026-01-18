@@ -9,6 +9,8 @@ import { initSocket } from "./config/socket";
 dotenv.config();
 
 const PORT = process.env.PORT || 3000;
+console.log("my project is running");
+
 
 // connect to database 
 connectDB();
