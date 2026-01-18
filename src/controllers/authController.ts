@@ -352,7 +352,7 @@ export const googleCallback = (req: AuthRequest, res: Response) => {
       token recived from google callback: ${token}
     ---------------`);
 
-    return res.redirect("http://localhost:5173/oauth-success");
+    return res.redirect(`${process.env.CLIENT_URL}/oauth-success`);
 
 
 
