@@ -8,7 +8,7 @@ import { AuthRequest } from "../types/auth";
 export const verifyToken = (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
     const token =req.cookies?.token || req.headers.authorization?.split(" ")[1];
-    console.log("verify token", token);
+    console.log("verify token from middlware", token);
     
 
     if (!token) {
