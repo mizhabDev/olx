@@ -1,3 +1,5 @@
+import "dotenv/config";
+
 import express from "express";
 import cookieParser from "cookie-parser";
 import authRoutes from "./routes/authRoutes";
@@ -9,23 +11,25 @@ import session from "express-session";
 import passport from "./config/passport";
 import wishlistRoutes from "./routes/wishListRoutes";
 import messageRoutes from './routes/messageRoutes';
-import dotenv from "dotenv";
+
 import path from "path";
 import cors from "cors";
 import myListRoutes from "./routes/myListRoutes";
 
-dotenv.config();  
 
 // cloudinary configuration
 import "./config/cloudinary"; 
 
 
-
 const app = express();
+
+console.log("CORS Origin set to:", process.env.CLIENT_URL); // Debugging
+
+
 
 app.use(
   cors({
-    origin: process.env.CLIENT_URL as string, 
+    origin: process.env.CLIENT_URL as string || process.env.LOCAL_CLIENT_URL as string, 
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
