@@ -10,6 +10,7 @@ import {
 } from "../controllers/authController";
 import { Router } from "express";
 import jwt from "jsonwebtoken";
+import { verifyToken } from "../middlewares/authMiddleware";
 const router = Router();
 
 
@@ -30,9 +31,9 @@ router.get(
 );
 
 
-router.get("/me", (req, res) => {
+router.get("/me", verifyToken,(req, res) => {
   const token = req.cookies.token;
-  console.log("token", token);
+  console.log("token from auth me: ", token);
   if (!token) return res.status(401).json({ message: "Unauthorized" });
 
   try {
