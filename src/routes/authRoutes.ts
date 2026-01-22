@@ -31,12 +31,13 @@ router.get(
 );
 
 
-router.get("/me", verifyToken,(req, res) => {
-  const token = req.cookies.token;
-  console.log("token from auth me: ", token);
-  if (!token) return res.status(401).json({ message: "Unauthorized" });
-
+router.get("/me", verifyToken, (req, res) => {
   try {
+    const token = req.cookies.token;
+    console.log("token from auth me: ", token);
+    if (!token) return res.status(401).json({ message: "Unauthorized" });
+
+
     const decoded = jwt.verify(token, process.env.JWT_SECRET!);
     res.json(decoded);
   } catch {

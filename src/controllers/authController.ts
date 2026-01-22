@@ -63,7 +63,7 @@ export const userExist = async (req: Request<{}, {}, typeUser>, res: Response): 
     res.cookie("token", token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
-      sameSite: "lax",
+      sameSite: "none",
       maxAge: 60 * 60 * 1000,
       path: "/"
     });
@@ -301,7 +301,7 @@ export const verifyOtp = async (req: AuthRequest, res: Response) => {
     res.cookie("token", token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
-      sameSite: "lax",
+      sameSite: "none",
       maxAge: 60 * 60 * 1000,
       path: "/"
     });
@@ -343,7 +343,7 @@ export const googleCallback = (req: AuthRequest, res: Response) => {
     res.cookie("token", token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
-      sameSite: "lax",
+      sameSite: "none",
       maxAge: 60 * 60 * 1000, // 1 hour 
       path: "/"
     });
@@ -502,7 +502,7 @@ export const logout = async (req: Request, res: Response) => {
     res.cookie("token", "", {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
-      sameSite: "lax",
+      sameSite: "none",
       maxAge: 0, // Expire immediately
       path: "/"
     });
